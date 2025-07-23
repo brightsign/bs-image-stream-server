@@ -1,0 +1,224 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go build artifacts
+/image-stream-server
+/image-stream-server-*
+/cmd/image-stream-server
+/cmd/image-stream-server-*
+/bs-frame-monitor
+/bs-frame-monitor_*
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.html
+coverage.out
+
+# Go workspace file
+go.work
+
+# Dependency directories
+vendor/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Log files
+*.log
+logs/
+*.log.*
+
+# Test artifacts
+test-images/
+test-output/
+/tmp/
+screenlog.*
+
+# Performance test results
+benchmark-results/
+load-test-results/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker volumes
+.docker/
+
+# Temporary files
+*.tmp
+*.temp
+*.pid
+
+# Debug files
+debug
+debug.test
+*.pprof
+
+# Binary builds directory (if using separate build dir)
+build/
+dist/
+
+# Go module cache
+go.sum.backup
+
+# Local configuration files
+config.local.yaml
+config.local.json
+*.local.conf
+
+# Generated documentation
+docs/generated/
+
+# Profiling data
+*.prof
+*.heap
+
+# Core dumps
+core
+core.*
+
+# Backup files
+*.bak
+*.backup
+
+# Editor backup files
+\#*\#
+.\#*
+
+# Python cache (for test tools)
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Node modules (if any frontend tools are added)
+node_modules/
+
+# Archives
+*.tar
+*.tar.gz
+*.zip
+*.7z
+*.rar
+
+# Certificates and keys (security)
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Local test data
+testdata/local/
+test-local/
+
+# Generated test images (from test tools)
+frame_*.jpg
+gradient_*.jpg
+counter_*.jpg
+test-frame-*.jpg
+
+# Output images for testing
+/tmp/output.jpg
+output.jpg
+
+# Systemd service files (generated)
+*.service
+
+# Binary checksums
+*.sha256
+*.md5
+
+# Release artifacts
+releases/
+*.deb
+*.rpm
+*.pkg
+*.msi
+
+# CI/CD artifacts
+.gitlab-ci-local/
+.github-ci-local/
+
+# Terraform files (if used for deployment)
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Ignore everything in cmd except source files
+/cmd/*
+!/cmd/*.go
+!/cmd/*/
+/cmd/*/*.go
+!/cmd/*/*.go
+
+# Allow test utilities source
+!/cmd/test-image-gen/
+!/cmd/test-feeder/
+
+# macOS specific
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux specific
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Windows specific
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
