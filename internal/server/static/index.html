@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BrightSign Frame Monitor</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .logo {
+            height: 40px;
+            margin-bottom: 10px;
+        }
+        .title {
+            color: #fff;
+            font-size: 24px;
+            font-weight: 300;
+            margin: 0;
+        }
+        .frame-container {
+            max-width: 90%;
+            margin: 0 auto;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .inner-frame {
+            background: #000;
+            padding: 10px;
+            border-radius: 8px;
+            position: relative;
+        }
+        #image { 
+            width: 100%; 
+            height: auto; 
+            display: block; 
+            border-radius: 5px;
+            max-height: 70vh;
+            object-fit: contain;
+        }
+        #status { 
+            color: #fff; 
+            text-align: center; 
+            margin: 10px 0;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+        }
+        .stats {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-family: monospace;
+        }
+        .error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="stats" id="stats">
+        FPS: 0 | Updates: 0
+    </div>
+    
+    <div class="header">
+        <svg class="logo" viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg">
+            <text x="10" y="25" fill="#ff6b35" font-family="Arial, sans-serif" font-size="18" font-weight="bold">BrightSign</text>
+            <circle cx="180" cy="20" r="8" fill="#f7931e"/>
+        </svg>
+        <h1 class="title">Frame Monitor</h1>
+    </div>
+    
+    <div class="frame-container">
+        <div class="inner-frame">
+            <div id="status">Loading...</div>
+            <img id="image" src="/image" alt="Live Image" style="display: none;">
+            <div id="error" class="error" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        BrightSign Digital Signage Platform
+    </div>
+    
+    <script>
+        let updateCount = 0;
+        let lastUpdate = Date.now();
+        let fps = 0;
+        
+        function updateStats() {
+            const now = Date.now();
+            const timeDiff = now - lastUpdate;
+            if (timeDiff >= 1000) {
+                fps = Math.round((updateCount * 1000) / timeDiff);
+                document.getElementById('stats').textContent = `FPS: ${fps} | Updates: ${updateCount}`;
+                updateCount = 0;
+                lastUpdate = now;
+            }
+        }
+        
+        function updateImage() {
+            const img = document.getElementById('image');
+            const status = document.getElementById('status');
+            const error = document.getElementById('error');
+            
+            const newImg = new Image();
+            newImg.onload = function() {
+                img.src = this.src;
+                img.style.display = 'block';
+                status.style.display = 'none';
+                error.style.display = 'none';
+                updateCount++;
+                updateStats();
+            };
+            
+            newImg.onerror = function() {
+                status.textContent = 'Image unavailable';
+                status.style.display = 'block';
+                error.textContent = 'Failed to load image';
+                error.style.display = 'block';
+                img.style.display = 'none';
+            };
+            
+            newImg.src = '/image?' + Date.now();
+        }
+        
+        updateImage();
+        setInterval(updateImage, 33);
+        setInterval(updateStats, 100);
+    </script>
+</body>
+</html>
