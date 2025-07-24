@@ -8,27 +8,16 @@
         body { 
             margin: 0; 
             padding: 20px; 
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); 
+            background: #ffffff; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
         }
         .header {
-            text-align: center;
             margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
         }
         .logo {
             height: 40px;
-            margin-bottom: 10px;
-        }
-        .title {
-            color: #fff;
-            font-size: 24px;
-            font-weight: 300;
-            margin: 0;
+            width: auto;
         }
         .frame-container {
             max-width: 90%;
@@ -59,12 +48,6 @@
             font-size: 14px;
             opacity: 0.8;
         }
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 12px;
-        }
         .stats {
             position: fixed;
             top: 10px;
@@ -92,11 +75,7 @@
     </div>
     
     <div class="header">
-        <svg class="logo" viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg">
-            <text x="10" y="25" fill="#ff6b35" font-family="Arial, sans-serif" font-size="18" font-weight="bold">BrightSign</text>
-            <circle cx="180" cy="20" r="8" fill="#f7931e"/>
-        </svg>
-        <h1 class="title">Frame Monitor</h1>
+        <img class="logo" src="/images/brightsign-logo.svg" alt="BrightSign Logo">
     </div>
     
     <div class="frame-container">
@@ -107,9 +86,6 @@
         </div>
     </div>
     
-    <div class="footer">
-        BrightSign Digital Signage Platform
-    </div>
     
     <script>
         let updateCount = 0;

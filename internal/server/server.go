@@ -29,6 +29,7 @@ func (s *Server) Start() error {
 	mux.HandleFunc("/raw", s.handleRaw)
 	mux.HandleFunc("/video", s.handleVideo)
 	mux.HandleFunc("/health", s.handleHealth)
+	mux.Handle("/images/", http.StripPrefix("/images/", http.FileServer(http.Dir("images"))))
 	mux.HandleFunc("/", s.handleIndex)
 
 	s.httpServer = &http.Server{
