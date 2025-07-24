@@ -33,7 +33,7 @@
         .frame-container {
             max-width: 90%;
             margin: 0 auto;
-            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            background: linear-gradient(45deg, #6B3AA6, #8B5AC7);
             padding: 15px;
             border-radius: 15px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -102,7 +102,7 @@
     <div class="frame-container">
         <div class="inner-frame">
             <div id="status">Loading...</div>
-            <img id="image" src="/image" alt="Live Image" style="display: none;">
+            <img id="image" src="/raw" alt="Live Image" style="display: none;">
             <div id="error" class="error" style="display: none;"></div>
         </div>
     </div>
@@ -150,7 +150,7 @@
                 img.style.display = 'none';
             };
             
-            newImg.src = '/image?' + Date.now();
+            newImg.src = '/raw?' + Date.now();
         }
         
         updateImage();

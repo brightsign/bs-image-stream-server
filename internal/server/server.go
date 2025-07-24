@@ -26,9 +26,10 @@ func NewServer(port int, cache *cache.ImageCache) *Server {
 func (s *Server) Start() error {
 	mux := http.NewServeMux()
 	
-	mux.HandleFunc("/", s.handleIndex)
-	mux.HandleFunc("/image", s.handleImage)
+	mux.HandleFunc("/raw", s.handleRaw)
+	mux.HandleFunc("/video", s.handleVideo)
 	mux.HandleFunc("/health", s.handleHealth)
+	mux.HandleFunc("/", s.handleIndex)
 
 	s.httpServer = &http.Server{
 		Addr:         fmt.Sprintf(":%d", s.port),

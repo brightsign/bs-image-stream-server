@@ -26,7 +26,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleRaw(w http.ResponseWriter, r *http.Request) {
 	data, etag, modTime, ok := s.cache.Get()
 	if !ok {
 		http.Error(w, "Image not available", http.StatusNotFound)
@@ -43,6 +43,18 @@ func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Write(data)
+}
+
+func (s *Server) handleVideo(w http.ResponseWriter, r *http.Request) {
+	data, err := staticFiles.ReadFile("static/index.html")
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 	w.Write(data)
 }
 
