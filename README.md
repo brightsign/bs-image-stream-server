@@ -1,10 +1,10 @@
-# BS Frame Monitor
+# Image Stream Server
 
 A lightweight embedded Linux web server written in Go that provides real-time image streaming capabilities for digital signage monitoring applications. This project is part of the BrightSign Platform Modernization initiative.
 
 ## Overview
 
-The BS Frame Monitor continuously monitors a local image file and serves it via HTTP at 30 FPS to web browsers, making it ideal for real-time visual monitoring of digital signage displays, camera feeds, or any application that generates periodic image updates.
+The Image Stream Server continuously monitors a local image file and serves it via HTTP at 30 FPS to web browsers, making it ideal for real-time visual monitoring of digital signage displays, camera feeds, or any application that generates periodic image updates.
 
 ### Key Features
 
@@ -42,7 +42,7 @@ This project includes a secure Docker-based development environment that provide
 
 1. **Clone or navigate to the project directory**:
    ```bash
-   cd bs-frame-monitor
+   cd image-stream-server
    ```
 
 2. **Build the development image**:
@@ -144,7 +144,7 @@ docker system prune -a
 ## Project Structure
 
 ```
-bs-frame-monitor/
+image-stream-server/
 ├── CLAUDE.md              # Claude Code guidance and implementation plan
 ├── docker-plan.md         # Detailed Docker development environment plan
 ├── Dockerfile             # Development environment container
