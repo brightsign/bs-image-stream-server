@@ -49,6 +49,12 @@ build-arm64:
 	@mkdir -p $(BINARY_DIR)
 	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(GOBUILD) $(BUILD_FLAGS) $(LDFLAGS) -o $(BINARY_ARM64) .
 
+# Build for Rockchip ARM64 player
+.PHONY: player
+player:
+	@mkdir -p $(BINARY_DIR)
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(GOBUILD) $(BUILD_FLAGS) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-player .
+
 # Build all embedded targets
 .PHONY: build-embedded
 build-embedded: build-linux build-arm build-arm64
@@ -76,6 +82,7 @@ clean:
 	rm -f image-stream-server-amd64
 	rm -f image-stream-server-arm
 	rm -f image-stream-server-arm64
+	rm -f $(BINARY_DIR)/$(BINARY_NAME)-player
 	rm -f coverage.out
 	rm -f coverage.html
 
@@ -178,6 +185,7 @@ help:
 	@echo "  build-linux     - Build for Linux x86_64"
 	@echo "  build-arm       - Build for ARM (Raspberry Pi 3)"
 	@echo "  build-arm64     - Build for ARM64 (Raspberry Pi 4)"
+	@echo "  player          - Build for Rockchip ARM64 player"
 	@echo "  build-embedded  - Build all embedded targets"
 	@echo ""
 	@echo "Development targets:"
