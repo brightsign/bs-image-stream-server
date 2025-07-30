@@ -11,9 +11,9 @@ import (
 )
 
 type Server struct {
-	port        int
-	cache       *cache.ImageCache
-	httpServer  *http.Server
+	port       int
+	cache      *cache.ImageCache
+	httpServer *http.Server
 }
 
 func NewServer(port int, cache *cache.ImageCache) *Server {
@@ -25,8 +25,8 @@ func NewServer(port int, cache *cache.ImageCache) *Server {
 
 func (s *Server) Start() error {
 	mux := http.NewServeMux()
-	
-	mux.HandleFunc("/raw", s.handleRaw)
+
+	mux.HandleFunc("/image", s.handleImage)
 	mux.HandleFunc("/video", s.handleVideo)
 	mux.HandleFunc("/health", s.handleHealth)
 	mux.Handle("/images/", http.StripPrefix("/images/", http.FileServer(http.Dir("images"))))

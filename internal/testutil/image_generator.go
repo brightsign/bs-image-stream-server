@@ -17,23 +17,23 @@ var jpegFooter = []byte{0xFF, 0xD9}
 
 func GenerateTestJPEG(width, height int, content string) []byte {
 	var buf bytes.Buffer
-	
+
 	buf.Write(jpegHeader)
-	
+
 	buf.WriteString(fmt.Sprintf("TEST_IMAGE_%s_", content))
-	
+
 	buf.Write([]byte{0xFF, 0xC0, 0x00, 0x11, 0x08})
 	binary.Write(&buf, binary.BigEndian, uint16(height))
 	binary.Write(&buf, binary.BigEndian, uint16(width))
 	buf.Write([]byte{0x03, 0x01, 0x22, 0x00, 0x02, 0x11, 0x01, 0x03, 0x11, 0x01})
-	
+
 	dataSize := width * height * 3 / 10
 	for i := 0; i < dataSize; i++ {
 		buf.WriteByte(byte(rand.Intn(256)))
 	}
-	
+
 	buf.Write(jpegFooter)
-	
+
 	return buf.Bytes()
 }
 
@@ -45,15 +45,15 @@ func GenerateTestJPEGWithTimestamp() []byte {
 func GenerateRandomJPEG(minSize, maxSize int) []byte {
 	size := minSize + rand.Intn(maxSize-minSize)
 	content := fmt.Sprintf("RANDOM_%d", rand.Intn(10000))
-	
+
 	var buf bytes.Buffer
 	buf.Write(jpegHeader)
 	buf.WriteString(content)
-	
+
 	for buf.Len() < size-len(jpegFooter) {
 		buf.WriteByte(byte(rand.Intn(256)))
 	}
-	
+
 	buf.Write(jpegFooter)
 	return buf.Bytes()
 }
@@ -61,17 +61,17 @@ func GenerateRandomJPEG(minSize, maxSize int) []byte {
 func GenerateLargeTestJPEG(sizeMB int) []byte {
 	targetSize := sizeMB * 1024 * 1024
 	content := fmt.Sprintf("LARGE_%dMB", sizeMB)
-	
+
 	var buf bytes.Buffer
 	buf.Write(jpegHeader)
 	buf.WriteString(content)
-	
+
 	chunkSize := 1024
 	chunk := make([]byte, chunkSize)
 	for i := range chunk {
 		chunk[i] = byte(rand.Intn(256))
 	}
-	
+
 	for buf.Len() < targetSize-len(jpegFooter) {
 		remaining := targetSize - len(jpegFooter) - buf.Len()
 		if remaining < chunkSize {
@@ -80,7 +80,7 @@ func GenerateLargeTestJPEG(sizeMB int) []byte {
 			buf.Write(chunk)
 		}
 	}
-	
+
 	buf.Write(jpegFooter)
 	return buf.Bytes()
 }
@@ -89,14 +89,14 @@ func ValidateJPEGFormat(data []byte) bool {
 	if len(data) < len(jpegHeader)+len(jpegFooter) {
 		return false
 	}
-	
+
 	if !bytes.HasPrefix(data, jpegHeader[:4]) {
 		return false
 	}
-	
+
 	if !bytes.HasSuffix(data, jpegFooter) {
 		return false
 	}
-	
+
 	return true
 }

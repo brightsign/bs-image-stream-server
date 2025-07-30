@@ -1,169 +1,259 @@
-# Image Stream Server
+# BS Frame Monitor
 
-A lightweight embedded Linux web server written in Go that provides real-time image streaming capabilities for digital signage monitoring applications. This project is part of the BrightSign Platform Modernization initiative.
+A high-performance embedded Linux web server written in Go that provides real-time image streaming capabilities for monitoring video output from digital signage and machine vision applications.
 
 ## Overview
 
-The Image Stream Server continuously monitors a local image file and serves it via HTTP at 30 FPS to web browsers, making it ideal for real-time visual monitoring of digital signage displays, camera feeds, or any application that generates periodic image updates.
+The BS Frame Monitor continuously monitors a local image file and serves it via HTTP at 30 FPS to web browsers, making it ideal for real-time visual monitoring of digital signage displays, camera feeds, or any application that generates periodic image updates.
 
 ### Key Features
 
 - **High-Performance Streaming**: 30 FPS image updates with minimal CPU overhead
 - **Embedded System Optimized**: Designed for resource-constrained Linux environments
-- **Professional UI**: BrightSign-branded web interface with modern styling
+- **Professional UI**: BrightSign-branded web interface with modern gradient styling
 - **Efficient Change Detection**: Uses file modification time instead of content hashing
 - **Zero Dependencies**: Built with Go standard library only
 - **Cross-Platform**: Supports ARM, ARM64, and x86_64 architectures
+- **ETag Support**: Bandwidth optimization with HTTP 304 Not Modified responses
+- **Graceful Shutdown**: Clean shutdown with signal handling (SIGINT/SIGTERM)
 
 ### Architecture
 
 - **Web Server**: HTTP server serving static HTML and real-time image endpoints
 - **File Monitor**: Efficient 30 FPS polling with modification time detection
-- **Image Cache**: Memory-efficient caching with ETag support for bandwidth optimization
+- **Image Cache**: Thread-safe memory caching with ETag support
 - **Professional Interface**: Responsive web UI with BrightSign branding
 
-## Use Cases
-
-- **Digital Signage Monitoring**: Real-time view of what's displayed on remote screens
-- **Camera Feed Streaming**: Live monitoring of security or industrial cameras
-- **Automated Testing**: Visual verification of display content in CI/CD pipelines
-- **Remote Troubleshooting**: Quick visual assessment of remote display issues
-
-## Development Environment
-
-This project includes a secure Docker-based development environment that provides isolated execution of development tools while limiting access to only the current project directory.
+## Quick Start
 
 ### Prerequisites
 
-- Docker installed and running
-- Current user has Docker access permissions
+- Go 1.21.5 or later
+- Linux, macOS, or Windows with WSL
+- A source that generates images to `/tmp/output.jpg`
 
-### Building the Development Container
-
-1. **Clone or navigate to the project directory**:
-   ```bash
-   cd image-stream-server
-   ```
-
-2. **Build the development image**:
-   ```bash
-   docker build -t claude-dev-env .
-   ```
-
-3. **Verify the build**:
-   ```bash
-   docker run --rm claude-dev-env go version
-   docker run --rm claude-dev-env node --version
-   docker run --rm claude-dev-env npm --version
-   ```
-
-### Running the Development Environment
-
-#### Interactive Development Session
-
-Start an interactive shell with full development tools:
+### Build and Run
 
 ```bash
-docker run -it --rm -v $(pwd):/workspace claude-dev-env
+# Clone the repository
+git clone <repository-url>
+cd bs-frame-monitor
+
+# Build the application
+make build
+
+# Run with default settings
+make run
+
+# Run with debug logging
+make run-debug
+
+# Run with custom settings
+make run-custom  # runs on port 8080 with custom file path
 ```
 
-This provides access to:
-- Go development environment
-- Node.js 20.x with npm and pnpm
-- TypeScript compiler
-- Essential tools: git, curl, wget, vim, nano
-- Claude CLI with convenient `clauded` alias
-
-#### Using Claude Code Safely
-
-The development environment includes a pre-configured alias for safe Claude Code execution:
+### Quick Build Options
 
 ```bash
-# Inside the container
-clauded  # Equivalent to: claude --dangerously-skip-permissions
-```
+# Show all available make targets
+make help
 
-#### Direct Claude Execution
+# Build and run in one command
+make run
 
-Run Claude Code directly without interactive session:
+# Development cycle (format, vet, test, build)
+make dev-cycle
 
-```bash
-docker run -it --rm -v $(pwd):/workspace claude-dev-env bash -c "cd /workspace && claude --dangerously-skip-permissions"
-```
+# Clean all build artifacts
+make clean
 
-#### Convenience Script
-
-Create a wrapper script for easier access:
-
-```bash
-#!/bin/bash
-# claude-safe.sh
-docker run -it --rm -v $(pwd):/workspace claude-dev-env bash -c "cd /workspace && claude --dangerously-skip-permissions $*"
-```
-
-Make it executable:
-```bash
-chmod +x claude-safe.sh
-./claude-safe.sh
-```
-
-### Security Benefits
-
-The Docker environment provides:
-
-- **Filesystem Isolation**: Access limited to current project directory only
-- **Process Isolation**: Container-level separation from host system
-- **Easy Cleanup**: Automatic container removal with `--rm` flag
-- **Permission Boundaries**: Even with `--dangerously-skip-permissions`, damage is contained
-- **No System Access**: Cannot modify host system files or other projects
-
-### Development Workflow
-
-1. Navigate to your project directory
-2. Start the development environment with Docker
-3. Use the `clauded` alias for convenient Claude Code execution
-4. Develop normally with all tools available
-5. Exit safely - container auto-removes
-
-### Container Management
-
-```bash
-# List running containers
-docker ps
-
-# Stop all containers
-docker stop $(docker ps -q)
-
-# Remove unused images
-docker image prune
-
-# Complete cleanup
-docker system prune -a
+# Initialize go modules
+make deps
 ```
 
 ## Project Structure
 
 ```
-image-stream-server/
-├── CLAUDE.md              # Claude Code guidance and implementation plan
-├── docker-plan.md         # Detailed Docker development environment plan
-├── Dockerfile             # Development environment container
-├── README.md              # This file
-└── (implementation files to be created)
-    ├── main.go            # Application entry point
-    ├── internal/
-    │   ├── server/        # HTTP server implementation
-    │   ├── monitor/       # File monitoring logic
-    │   └── cache/         # Image caching system
-    └── web/
-        └── index.html     # BrightSign-branded web interface
+bs-frame-monitor/
+├── CLAUDE.md                      # Claude Code guidance and implementation plan
+├── Makefile                       # Build automation and tasks
+├── README.md                      # This file
+├── go.mod                         # Go module definition
+├── main.go                        # Application entry point
+├── internal/
+│   ├── cache/
+│   │   ├── image_cache.go         # Thread-safe image caching
+│   │   └── image_cache_test.go    # Cache unit tests
+│   ├── monitor/
+│   │   ├── file_monitor.go        # 30 FPS file monitoring
+│   │   └── file_monitor_test.go   # Monitor unit tests
+│   ├── server/
+│   │   ├── server.go              # HTTP server setup
+│   │   ├── handlers.go            # HTTP request handlers
+│   │   ├── handlers_test.go       # Handler unit tests
+│   │   └── static/
+│   │       └── index.html         # BrightSign-branded web interface
+│   └── testutil/
+│       └── image_generator.go     # Test image generation utilities
+├── integration_test.go            # End-to-end integration tests
+├── load_test.go                   # Performance load testing
+└── test-plan.md                   # Comprehensive test plan
 ```
 
-## Next Steps
+## API Endpoints
 
-1. **Set up development environment** using the Docker instructions above
-2. **Review implementation plan** in `CLAUDE.md`
-3. **Start development** using the `clauded` command in the secure container
-4. **Build the Go application** following the architecture outlined in the plan
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | GET | Serves the BrightSign-branded HTML interface |
+| `/image` | GET | Returns the current JPEG image with ETag support |
+| `/health` | GET | Health check endpoint returning JSON status |
+| `/images/*` | GET | Static file server for assets (logos, etc.) |
 
-For detailed implementation guidance, see `CLAUDE.md`. For Docker environment details, see `docker-plan.md`.
+## Command Line Options
+
+```bash
+./bs-frame-monitor [options]
+
+Options:
+  -port int
+        HTTP server port (default 8080)
+  -file string
+        Path to image file to monitor (default "/tmp/output.jpg")
+  -debug
+        Enable debug logging
+```
+
+## Building for Embedded Targets
+
+All build targets automatically disable CGO for static binary compilation.
+
+### Build for all platforms
+```bash
+make build-embedded
+```
+
+### Build for specific platforms
+```bash
+# Linux x86_64
+make build-linux
+
+# ARM (Raspberry Pi 3, 32-bit)
+make build-arm
+
+# ARM64 (Raspberry Pi 4, 64-bit)
+make build-arm64
+
+# BrightSign/Rockchip ARM64 player
+make player
+```
+
+### Build output locations
+All binaries are placed in the `cmd/` directory:
+- `cmd/image-stream-server-amd64` - Linux x86_64
+- `cmd/image-stream-server-arm` - ARM 32-bit
+- `cmd/image-stream-server-arm64` - ARM 64-bit
+- `cmd/image-stream-server-player` - BrightSign player
+
+## Development
+
+### Run tests
+```bash
+# Run all tests
+make test
+
+# Run with coverage
+make test-coverage
+
+# Run integration tests only
+make test ARGS="./integration_test.go"
+
+# Run load tests only
+make test ARGS="./load_test.go"
+```
+
+### Code quality
+```bash
+# Format code
+make fmt
+
+# Vet code
+make vet
+
+# Run linter (requires golangci-lint)
+make lint
+
+# Full development cycle
+make dev-cycle
+```
+
+### Load testing
+```bash
+# Simple load test against localhost:8080
+make load-test
+```
+
+## Deployment
+
+### Systemd Service
+
+Create `/etc/systemd/system/bs-frame-monitor.service`:
+
+```ini
+[Unit]
+Description=BrightSign Frame Monitor
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/bs-frame-monitor
+ExecStart=/opt/bs-frame-monitor/bs-frame-monitor -port 8080 -file /tmp/output.jpg
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start:
+```bash
+sudo systemctl enable bs-frame-monitor
+sudo systemctl start bs-frame-monitor
+```
+
+### Static Binary Deployment
+
+The application compiles to a single static binary with no dependencies:
+
+```bash
+# Build static binary for deployment
+make build-linux
+
+# Copy to target system
+scp cmd/image-stream-server-amd64 user@target:/opt/bs-frame-monitor/
+```
+
+## Performance Optimization
+
+The server is optimized for embedded systems with:
+
+- **Memory efficiency**: Reuses buffers, minimizes allocations
+- **CPU efficiency**: Only reads files when modification time changes
+- **Network efficiency**: ETag support reduces bandwidth usage
+- **Concurrent handling**: Thread-safe operations throughout
+
+## Use Cases
+
+- **Digital Signage Monitoring**: Real-time view of display output
+- **Camera Feed Streaming**: Live monitoring of security or industrial cameras
+- **Automated Testing**: Visual verification of display content in CI/CD pipelines
+- **Remote Troubleshooting**: Quick visual assessment of remote display issues
+- **Machine Vision**: Monitor output from image processing applications
+
+## License
+
+[Add your license here]
+
+## Contributing
+
+[Add contributing guidelines here]

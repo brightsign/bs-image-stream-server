@@ -29,9 +29,9 @@ func NewFileMonitor(filePath string, cache *cache.ImageCache, interval time.Dura
 
 func (fm *FileMonitor) Start() {
 	fm.ticker = time.NewTicker(fm.interval)
-	
+
 	fm.checkAndUpdateImage()
-	
+
 	go func() {
 		for {
 			select {

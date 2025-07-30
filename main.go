@@ -27,7 +27,7 @@ func main() {
 
 	imageCache := cache.NewImageCache()
 	fileMonitor := monitor.NewFileMonitor(*filePath, imageCache, time.Millisecond*33)
-	
+
 	fileMonitor.Start()
 	defer fileMonitor.Stop()
 

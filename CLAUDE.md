@@ -243,24 +243,28 @@ image-stream-server/
 
 ### Sequence Diagram
 
-```
-Browser                 Web Server              File Monitor
-   │                       │                        │
-   │──GET /──────────────►│                        │
-   │◄─────HTML page───────│                        │
-   │                       │                        │
-   │                       │◄──30fps timer─────────│
-   │                       │   check file stat      │
-   │                       │   read if changed      │
-   │                       │   update cache         │
-   │                       │                        │
-   │──GET /image──────────►│                        │
-   │                       │──get cached image─────►│
-   │◄─────JPEG data───────│◄─────return buffer─────│
-   │                       │                        │
-   │     (33ms later)      │                        │
-   │──GET /image──────────►│                        │
-   │◄─────304 Not Modified│  (if no changes)       │
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant Web Server
+    participant File Monitor
+    
+    Browser->>Web Server: GET /
+    Web Server-->>Browser: HTML page
+    
+    Note over File Monitor: 30fps timer loop
+    File Monitor->>Web Server: check file stat
+    File Monitor->>Web Server: read if changed
+    File Monitor->>Web Server: update cache
+    
+    Browser->>Web Server: GET /image
+    Web Server->>File Monitor: get cached image
+    File Monitor-->>Web Server: return buffer
+    Web Server-->>Browser: JPEG data
+    
+    Note over Browser: 33ms later
+    Browser->>Web Server: GET /image
+    Web Server-->>Browser: 304 Not Modified<br/>(if no changes)
 ```
 
 ## Development Commands
@@ -268,40 +272,71 @@ Browser                 Web Server              File Monitor
 ### Build and Run
 ```bash
 # Build the server
-go build -o image-stream-server main.go
+make build
 
 # Run with default settings
-./image-stream-server
-
-# Run with custom port and file path
-./image-stream-server -port 8080 -file /tmp/custom.jpg
+make run
 
 # Run with debug logging
-./image-stream-server -debug
+make run-debug
+
+# Run with custom settings (port 8080, custom file path)
+make run-custom
+
+# Build for all embedded platforms
+make build-embedded
+
+# Build for specific platform
+make build-linux   # Linux x86_64
+make build-arm     # ARM 32-bit
+make build-arm64   # ARM 64-bit
+make player        # Rockchip ARM64 player
 ```
 
 ### Testing
 ```bash
 # Run unit tests
-go test ./...
+make test
 
 # Run with coverage
-go test -cover ./...
+make test-coverage
 
-# Load testing with curl
-while true; do curl -s http://localhost:8080/image > /dev/null; done
+# Load testing
+make load-test
+
+# Run full development cycle (format, vet, test, build)
+make dev-cycle
+
+# Format code
+make fmt
+
+# Vet code
+make vet
+
+# Lint code (requires golangci-lint)
+make lint
 ```
 
 ### Cross-compilation for Embedded Targets
 ```bash
+# Build for all embedded platforms at once
+make build-embedded
+
+# Individual platform builds:
 # For ARM64 (Raspberry Pi 4, etc.)
-GOOS=linux GOARCH=arm64 go build -o image-stream-server-arm64 main.go
+make build-arm64
 
 # For ARM (Raspberry Pi 3, etc.)
-GOOS=linux GOARCH=arm go build -o image-stream-server-arm main.go
+make build-arm
 
 # For x86_64 Linux
-GOOS=linux GOARCH=amd64 go build -o image-stream-server-amd64 main.go
+make build-linux
+
+# For Rockchip ARM64 player
+make player
+
+# Clean all build artifacts
+make clean
 ```
 
 The design provides efficient 30fps image streaming with minimal resource usage, perfect for embedded Linux environments.
