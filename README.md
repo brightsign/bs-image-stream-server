@@ -4,7 +4,20 @@ A high-performance embedded Linux web server written in Go that provides real-ti
 
 ## Overview
 
-The bs-image-stream-server continuously monitors a local image file and serves it via HTTP at 30 FPS to web browsers, making it ideal for real-time visual monitoring of digital signage displays, camera feeds, or any application that generates periodic image updates.
+The bs-image-stream-server continuously monitors a local image file and serves it via HTTP at 30 FPS, making it ideal for real-time visual monitoring of digital signage displays, camera feeds, or any application that generates periodic image updates.
+
+### How It Works
+
+The server operates using a simple but effective architecture:
+
+1. **File Monitoring**: Watches a specified image file (e.g., `/tmp/output.jpg`) using 33ms intervals (30 FPS)
+2. **Change Detection**: Uses file modification time comparison to detect when the image updates
+3. **Memory Caching**: Stores the current image in memory with ETag support for efficient serving
+4. **Multi-Format Streaming**: Serves the image through multiple endpoints:
+   - **Web Interface** (`/`): HTML page with JavaScript-based 30 FPS refresh
+   - **MJPEG Stream** (`/video`): Direct multipart MJPEG stream for browsers and ffmpeg
+   - **Raw Image** (`/image`): Direct JPEG access with HTTP caching headers
+5. **Zero Dependencies**: Single binary with all assets embedded - no external files needed
 
 ## How to Use
 
@@ -95,70 +108,136 @@ make clean
 make deps
 ```
 
+## Usage
+
+### Basic Viewing
+
+Start the server and view the stream in your browser:
+
+```bash
+# Start monitoring an image file
+./bs-image-stream-server -file /path/to/image.jpg -port 8080
+
+# View in browser with web interface
+open http://localhost:8080/
+
+# View raw video stream (no HTML wrapper)
+open http://localhost:8080/video
+```
+
+### Recording with ffmpeg
+
+The `/video` endpoint provides an MJPEG stream that ffmpeg can record:
+
+```bash
+# Basic recording (copies stream as-is)
+ffmpeg -i http://localhost:8080/video -c copy recording.mpeg
+
+# Record for specific duration (60 seconds)
+ffmpeg -i http://localhost:8080/video -t 60 -c copy recording.mpeg
+
+# Convert to MP4 while recording
+ffmpeg -i http://localhost:8080/video -c:v libx264 -r 30 recording.mp4
+
+# High quality MP4 recording
+ffmpeg -i http://localhost:8080/video -c:v libx264 -crf 18 -r 30 high_quality.mp4
+
+# Record with custom frame rate
+ffmpeg -i http://localhost:8080/video -r 25 -c:v libx264 output.mp4
+```
+
+### Streaming to Other Services
+
+Use the video stream with streaming platforms:
+
+```bash
+# Stream to YouTube Live (requires stream key)
+ffmpeg -i http://localhost:8080/video -c:v libx264 -b:v 2500k -r 30 \
+  -f flv rtmp://a.rtmp.youtube.com/live2/YOUR_STREAM_KEY
+
+# Stream to Twitch (requires stream key)
+ffmpeg -i http://localhost:8080/video -c:v libx264 -b:v 2500k -r 30 \
+  -f flv rtmp://live.twitch.tv/app/YOUR_STREAM_KEY
+
+# Re-stream to local RTMP server
+ffmpeg -i http://localhost:8080/video -c:v libx264 -f flv rtmp://localhost/live/stream
+```
+
+### Integration Examples
+
+Embed or integrate the stream in applications:
+
+```bash
+# View in VLC media player
+vlc http://localhost:8080/video
+
+# Use with OBS Studio
+# Add "Media Source" → Input: http://localhost:8080/video
+
+# Embed in HTML page
+echo '<img src="http://localhost:8080/video" alt="Live Stream">' > viewer.html
+
+# Use with curl for testing
+curl -N http://localhost:8080/video > stream_test.mjpeg
+```
+
+### Monitoring and Health Checks
+
+```bash
+# Check server health
+curl http://localhost:8080/health
+
+# Get current image directly
+curl http://localhost:8080/image > current_frame.jpg
+
+# Monitor with cache-aware requests
+curl -H "If-None-Match: \"1234567890-12345\"" http://localhost:8080/image
+```
+
 ## Practical Examples
 
 ### Example 1: Monitor BrightSign Player Output
 
-If your BrightSign player writes screenshots to `/tmp/display.jpg`:
+Monitor a BrightSign player that saves screenshots:
 
 ```bash
-# Start the monitor
+# Start monitoring the player's screenshot file
 ./bs-image-stream-server -port 8080 -file /tmp/display.jpg
 
-# View with web interface
-# http://player-ip:8080/
-
-# View raw MJPEG stream
-# http://player-ip:8080/video
+# Record player output for analysis
+ffmpeg -i http://player-ip:8080/video -t 300 -c copy player_recording.mpeg
 ```
 
 ### Example 2: Security Camera Integration
 
-Monitor a camera that saves snapshots:
+Monitor a camera that saves snapshots and stream to YouTube:
 
 ```bash
-# Monitor camera snapshot
+# Start monitoring camera
 ./bs-image-stream-server -port 8080 -file /var/cameras/front-door.jpg
 
-# View from anywhere on your network
-# http://server-ip:8080/
+# Stream live to YouTube (requires stream key)
+ffmpeg -i http://server-ip:8080/video -c:v libx264 -b:v 1500k -r 25 \
+  -f flv rtmp://a.rtmp.youtube.com/live2/YOUR_STREAM_KEY
 ```
 
-### Example 3: Custom Application Integration
+### Example 3: Automated Monitoring and Recording
 
-Fetch the image programmatically:
+Set up automated recording with rotation:
 
 ```bash
-# Get current image with curl
-curl -H "If-None-Match: \"12345-6789\"" http://localhost:8080/image
+# Start the server
+./bs-image-stream-server -file /tmp/output.jpg &
 
-# Response includes ETag header for caching
-# Returns 304 if image hasn't changed
+# Record 1-hour segments with timestamps
+while true; do
+  timestamp=$(date +%Y%m%d_%H%M%S)
+  ffmpeg -i http://localhost:8080/video -t 3600 -c copy "recording_${timestamp}.mpeg"
+  sleep 10  # Brief pause between recordings
+done
 ```
 
-### Example 4: Video Recording and Streaming
-
-Record with ffmpeg or use in video software:
-
-```bash
-# Record with ffmpeg (use format=mjpeg for compatibility)
-ffmpeg -i http://localhost:8080/video?format=mjpeg -c copy output.avi
-
-# Record as MP4 with re-encoding
-ffmpeg -i http://localhost:8080/video?format=mjpeg -c:v libx264 -r 30 output.mp4
-
-# View in VLC media player (both formats work)
-vlc http://localhost:8080/video
-vlc http://localhost:8080/video?format=mjpeg
-
-# Embed in HTML (use default multipart format)
-<img src="http://server:8080/video" />
-
-# Use with streaming software like OBS
-# Add "Media Source" with URL: http://server:8080/video?format=mjpeg
-```
-
-### Example 5: Load Balancer Configuration
+### Example 4: Load Balancer Configuration
 
 Use the health endpoint for monitoring:
 
@@ -205,12 +284,10 @@ bs-image-stream-server/
 | Endpoint | Method | Description | Use Case |
 |----------|--------|-------------|----------|
 | `/` | GET | HTML viewing interface with BrightSign branding | General monitoring and viewing with web interface |
-| `/video` | GET | Multipart MJPEG stream (default) | Browser viewing without HTML wrapper |
-| `/video?format=mjpeg` | GET | Raw MJPEG stream for recording | ffmpeg recording and video software |
+| `/video` | GET | Multipart MJPEG stream | Browser viewing and ffmpeg recording |
 
 - `/` provides a branded web interface with JavaScript-based 30 FPS refresh
-- `/video` provides a multipart MJPEG stream that browsers can display directly
-- `/video?format=mjpeg` provides a raw MJPEG stream compatible with video recording tools
+- `/video` provides an MJPEG stream that works with both browsers and recording tools
 
 ### API Endpoints
 
@@ -232,20 +309,18 @@ bs-image-stream-server/
 - **When to use**: When you need a polished interface for monitoring
 
 #### `/video` - MJPEG Streaming
-- **Purpose**: Live video streaming in different formats
-- **Default behavior**: Multipart MJPEG stream for browsers
+- **Purpose**: Live video streaming compatible with browsers and recording tools
 - **Features**:
   - Native browser video streaming at 30 FPS
+  - Direct ffmpeg recording compatibility (confirmed working)
   - No HTML wrapper or JavaScript required
   - Lower bandwidth than JavaScript refresh approach
-- **Format options**:
-  - `/video` - Multipart stream (browser-friendly)
-  - `/video?format=mjpeg` - Raw MJPEG (ffmpeg-compatible)
+  - Works with VLC, OBS, and other video software
 - **When to use**:
   - Browser viewing without web interface
-  - Video recording with ffmpeg
+  - Video recording with ffmpeg (`ffmpeg -i http://server/video -c copy output.mpeg`)
   - Embedding in other applications
-  - Video streaming software integration
+  - Streaming to platforms (YouTube, Twitch, etc.)
 
 #### `/image` - Direct Image Access
 - **Purpose**: Programmatic access to the current image
@@ -420,29 +495,47 @@ The server is optimized for embedded systems with:
 
 ## Troubleshooting
 
-### ffmpeg Recording Issues
+### ffmpeg Recording
 
-If ffmpeg fails to record, try these solutions:
+The `/video` endpoint works directly with ffmpeg without requiring format parameters:
 
 ```bash
-# Use the MJPEG format explicitly
-ffmpeg -i http://server:8080/video?format=mjpeg -c copy output.avi
+# Basic recording (confirmed working)
+ffmpeg -i http://server:8080/video -c copy recording.mpeg
 
-# If -c copy fails, re-encode the stream
-ffmpeg -i http://server:8080/video?format=mjpeg -c:v libx264 -r 30 output.mp4
+# If stream format issues occur, try re-encoding
+ffmpeg -i http://server:8080/video -c:v libx264 -r 30 recording.mp4
 
 # For longer recordings, add duration limit
-ffmpeg -i http://server:8080/video?format=mjpeg -t 60 -c copy output.avi
+ffmpeg -i http://server:8080/video -t 3600 -c copy recording.mpeg
 
 # If connection issues occur, increase buffer size
-ffmpeg -i http://server:8080/video?format=mjpeg -buffer_size 32768 -c copy output.avi
+ffmpeg -i http://server:8080/video -buffer_size 32768 -c copy recording.avi
+```
+
+**Expected behavior**: ffmpeg will detect the stream as `mpjpeg` format and achieve 25-30 FPS recording. The "Packet corrupt" warning at the end is normal when the stream ends.
+
+### Stream Analysis
+
+ffmpeg should show output similar to:
+```
+Input #0, mpjpeg, from 'http://server:8080/video':
+  Duration: N/A, bitrate: N/A
+  Stream #0:0: Video: mjpeg (Baseline), yuvj420p, 640x480, 25 tbr, 25 tbn
 ```
 
 ### Browser Compatibility
 
-- Use `/video` (default) for browser viewing
-- Use `/video?format=mjpeg` for video recording tools
-- Some older browsers may not support multipart streams
+- **Web Interface** (`/`): Works in all modern browsers
+- **Video Stream** (`/video`): Works in browsers that support multipart MJPEG
+- **Direct Image** (`/image`): Universal compatibility with HTTP caching
+
+### Common Issues
+
+1. **No image displayed**: Check that the source file exists and is being updated
+2. **Stream won't start**: Verify the file path and permissions
+3. **ffmpeg connection refused**: Ensure the server is running and accessible
+4. **Low frame rate**: Source file may not be updating at 30 FPS
 
 ## License
 
