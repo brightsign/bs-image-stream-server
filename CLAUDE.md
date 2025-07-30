@@ -332,8 +332,8 @@ make build-arm
 # For x86_64 Linux
 make build-linux
 
-# For Rockchip ARM64 player
-make player
+# For Rockchip ARM64 player (now built with default 'make build')
+make build-arm64
 
 # Clean all build artifacts
 make clean

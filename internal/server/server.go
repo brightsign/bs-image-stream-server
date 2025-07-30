@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -29,12 +28,13 @@ func (s *Server) Start() error {
 	mux.HandleFunc("/image", s.handleImage)
 	mux.HandleFunc("/video", s.handleVideo)
 	mux.HandleFunc("/health", s.handleHealth)
+	mux.HandleFunc("/images/brightsign-logo.svg", s.handleLogo)
 	mux.Handle("/images/", http.StripPrefix("/images/", http.FileServer(http.Dir("images"))))
 	mux.HandleFunc("/", s.handleIndex)
 
 	s.httpServer = &http.Server{
 		Addr:         fmt.Sprintf(":%d", s.port),
-		Handler:      s.loggingMiddleware(mux),
+		Handler:      mux,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  60 * time.Second,
@@ -49,12 +49,4 @@ func (s *Server) Shutdown() {
 		defer cancel()
 		s.httpServer.Shutdown(ctx)
 	}
-}
-
-func (s *Server) loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		next.ServeHTTP(w, r)
-		log.Printf("%s %s %v", r.Method, r.URL.Path, time.Since(start))
-	})
 }

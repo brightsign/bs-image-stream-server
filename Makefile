@@ -19,17 +19,18 @@ BINARY_ARM64=$(BINARY_DIR)/$(BINARY_NAME)-arm64
 
 # Build flags
 LDFLAGS=-ldflags "-w -s"
-BUILD_FLAGS=-a -installsuffix cgo
+BUILD_FLAGS=-a -installsuffix cgo -buildvcs=false
 
 # Default target
 .PHONY: all
 all: test build
 
-# Build the binary for current platform
+# Build the binary for current platform and player
 .PHONY: build
 build:
 	@mkdir -p $(BINARY_DIR)
-	$(GOBUILD) $(BUILD_FLAGS) $(LDFLAGS) -o $(BINARY_PATH) .
+	CGO_ENABLED=0 $(GOBUILD) $(BUILD_FLAGS) $(LDFLAGS) -o $(BINARY_PATH) .
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(GOBUILD) $(BUILD_FLAGS) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-player .
 
 # Build for Linux (x86_64)
 .PHONY: build-linux
@@ -49,12 +50,6 @@ build-arm64:
 	@mkdir -p $(BINARY_DIR)
 	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(GOBUILD) $(BUILD_FLAGS) $(LDFLAGS) -o $(BINARY_ARM64) .
 
-# Build for Rockchip ARM64 player
-.PHONY: player
-player:
-	@mkdir -p $(BINARY_DIR)
-	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(GOBUILD) $(BUILD_FLAGS) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-player .
-
 # Build all embedded targets
 .PHONY: build-embedded
 build-embedded: build-linux build-arm build-arm64
@@ -62,12 +57,12 @@ build-embedded: build-linux build-arm build-arm64
 # Run tests
 .PHONY: test
 test:
-	$(GOTEST) -v ./...
+	CGO_ENABLED=0 $(GOTEST) -v ./...
 
 # Run tests with coverage
 .PHONY: test-coverage
 test-coverage:
-	$(GOTEST) -v -coverprofile=coverage.out ./...
+	CGO_ENABLED=0 $(GOTEST) -v -coverprofile=coverage.out ./...
 	$(GOCMD) tool cover -html=coverage.out -o coverage.html
 
 # Clean build artifacts
@@ -181,11 +176,10 @@ help:
 	@echo "BS Frame Monitor - Available targets:"
 	@echo ""
 	@echo "Build targets:"
-	@echo "  build           - Build binary for current platform"
+	@echo "  build           - Build binary for current platform and ARM64 player"
 	@echo "  build-linux     - Build for Linux x86_64"
 	@echo "  build-arm       - Build for ARM (Raspberry Pi 3)"
 	@echo "  build-arm64     - Build for ARM64 (Raspberry Pi 4)"
-	@echo "  player          - Build for Rockchip ARM64 player"
 	@echo "  build-embedded  - Build all embedded targets"
 	@echo ""
 	@echo "Development targets:"

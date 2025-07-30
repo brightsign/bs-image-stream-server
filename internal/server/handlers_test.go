@@ -186,22 +186,3 @@ func TestHandleHealthWithImage(t *testing.T) {
 	}
 }
 
-func TestLoggingMiddleware(t *testing.T) {
-	cache := cache.NewImageCache()
-	server := NewServer(8080, cache)
-
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-
-	middleware := server.loggingMiddleware(handler)
-
-	req := httptest.NewRequest("GET", "/test", nil)
-	w := httptest.NewRecorder()
-
-	middleware.ServeHTTP(w, req)
-
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected status 200, got %d", w.Code)
-	}
-}

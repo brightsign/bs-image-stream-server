@@ -7,31 +7,23 @@
         body { 
             margin: 0; 
             padding: 20px; 
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); 
+            background: #ffffff; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
+        .logo-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
         }
         .logo {
-            height: 40px;
-            margin-bottom: 10px;
-        }
-        .title {
-            color: #fff;
-            font-size: 24px;
-            font-weight: 300;
-            margin: 0;
+            height: 48px; /* ~0.5 inch on standard monitors (96 DPI) */
+            width: auto;
         }
         .frame-container {
             max-width: 90%;
-            margin: 0 auto;
-            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            margin: 80px auto 0 auto; /* Added top margin to accommodate logo */
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
             padding: 15px;
             border-radius: 15px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -48,34 +40,21 @@
             display: block; 
             border-radius: 5px;
         }
-        #status { 
-            color: #fff; 
-            text-align: center; 
-            margin: 10px 0;
-            font-size: 14px;
-            opacity: 0.8;
-        }
         .footer {
             text-align: center;
             margin-top: 20px;
-            color: rgba(255, 255, 255, 0.6);
+            color: #666;
             font-size: 12px;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <svg class="logo" viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg">
-            <!-- BrightSign Logo SVG -->
-            <text x="10" y="25" fill="#ff6b35" font-family="Arial, sans-serif" font-size="18" font-weight="bold">BrightSign</text>
-            <circle cx="180" cy="20" r="8" fill="#f7931e"/>
-        </svg>
-        <h1 class="title">Frame Monitor</h1>
+    <div class="logo-container">
+        <img class="logo" src="/images/brightsign-logo.svg" alt="BrightSign Logo">
     </div>
     
     <div class="frame-container">
         <div class="inner-frame">
-            <div id="status">Loading...</div>
             <img id="image" src="/image" alt="Live Image">
         </div>
     </div>
