@@ -1,6 +1,9 @@
 # bs-image-stream-server Makefile
 # Build configuration for embedded Linux image streaming server
 
+# Player configuration
+PLAYER ?= brightsign
+
 # Go parameters
 GOCMD=go
 GOBUILD=$(GOCMD) build
@@ -53,6 +56,27 @@ build-arm64:
 # Build all embedded targets
 .PHONY: build-embedded
 build-embedded: build-linux build-arm build-arm64
+
+# Install player binary to BrightSign player using bscp
+.PHONY: install
+install: build
+	@echo "Installing bs-image-stream-server to player: $(PLAYER)"
+	@if ! command -v bscp >/dev/null 2>&1; then \
+		echo "Error: bscp not found. Please install it from:"; \
+		echo "https://github.com/gherlein/bs-scp"; \
+		echo ""; \
+		echo "Installation:"; \
+		echo "  git clone https://github.com/gherlein/bs-scp.git"; \
+		echo "  cd bs-scp"; \
+		echo "  make install"; \
+		exit 1; \
+	fi
+	@echo "Copying $(BINARY_DIR)/$(BINARY_NAME)-player to $(PLAYER):/tmp/"
+	bscp $(BINARY_DIR)/$(BINARY_NAME)-player $(PLAYER):/tmp/bs-image-stream-server
+	@echo "✓ Installation complete. Binary copied to $(PLAYER):/tmp/bs-image-stream-server"
+	@echo ""
+	@echo "To start the server on the player, SSH to $(PLAYER) and run:"
+	@echo "  /tmp/bs-image-stream-server -file /tmp/screenshot.jpg -port 8080"
 
 # Run tests
 .PHONY: test
@@ -181,6 +205,7 @@ help:
 	@echo "  build-arm       - Build for ARM (Raspberry Pi 3)"
 	@echo "  build-arm64     - Build for ARM64 (Raspberry Pi 4)"
 	@echo "  build-embedded  - Build all embedded targets"
+	@echo "  install         - Build and install player binary to BrightSign (requires bscp)"
 	@echo ""
 	@echo "Development targets:"
 	@echo "  test            - Run tests"
@@ -209,3 +234,9 @@ help:
 	@echo "  install-dev-deps - Install development dependencies"
 	@echo "  systemd-service - Create systemd service file"
 	@echo "  help            - Show this help message"
+	@echo ""
+	@echo "Configuration:"
+	@echo "  Set PLAYER variable to specify BrightSign hostname/IP:"
+	@echo "    make install PLAYER=my-brightsign-player"
+	@echo "    make install PLAYER=192.168.1.100"
+	@echo "  Default: PLAYER=brightsign"

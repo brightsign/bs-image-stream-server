@@ -68,6 +68,7 @@ The server operates using a simple but effective architecture:
 - Go 1.21.5 or later
 - Linux, macOS, or Windows with WSL
 - A source that generates images to `/tmp/output.jpg`
+- Optional: [bscp](https://github.com/gherlein/bs-scp) for BrightSign deployment
 
 ### Build and Run
 
@@ -97,6 +98,9 @@ make help
 
 # Build and run in one command
 make run
+
+# Build and install to BrightSign player
+make install PLAYER=<player-hostname>
 
 # Development cycle (format, vet, test, build)
 make dev-cycle
@@ -196,16 +200,23 @@ curl -H "If-None-Match: \"1234567890-12345\"" http://<player>:8080/image
 
 ## Practical Examples
 
-### Example 1: Monitor BrightSign Player Output
+### Example 1: Deploy to BrightSign Player
 
-Monitor a BrightSign player that saves screenshots:
+Deploy and monitor a BrightSign player directly:
 
 ```bash
-# Start monitoring the player's screenshot file
-./bs-image-stream-server -port 8080 -file /tmp/display.jpg
+# Deploy to BrightSign player
+make install PLAYER=my-brightsign-player
 
-# Record player output for analysis
-ffmpeg -i http://player-ip:8080/video -t 300 -c copy player_recording.mpeg
+# SSH to player and start monitoring
+ssh brightsign@my-brightsign-player
+/tmp/bs-image-stream-server -file /tmp/screenshot.jpg -port 8080 &
+
+# From your computer, record the player output
+ffmpeg -i http://my-brightsign-player:8080/video -t 300 -c copy player_recording.mpeg
+
+# View live stream in browser
+open http://my-brightsign-player:8080/
 ```
 
 ### Example 2: Security Camera Integration
@@ -393,6 +404,33 @@ All binaries are placed in the `cmd/` directory:
 - `cmd/image-stream-server-arm64` - ARM 64-bit
 - `cmd/image-stream-server-player` - BrightSign player
 
+### BrightSign Player Deployment
+
+Deploy directly to BrightSign players using the `make install` target:
+
+```bash
+# Install to default player hostname 'brightsign'
+make install
+
+# Install to specific player
+make install PLAYER=my-player-name
+make install PLAYER=192.168.1.100
+
+# Set default player in environment
+export PLAYER=my-brightsign-device
+make install
+```
+
+**Requirements**: 
+- [bscp](https://github.com/gherlein/bs-scp) must be installed
+- Network access to the BrightSign player
+- Player must have SSH enabled
+
+**Installation process**:
+1. Builds the ARM64 player binary
+2. Copies binary to player's `/tmp/bs-image-stream-server`
+3. Provides instructions for starting the server on the player
+
 ## Development
 
 ### Run tests
@@ -432,6 +470,19 @@ make load-test
 ```
 
 ## Deployment
+
+### BrightSign Player Deployment
+
+Use the built-in deployment system:
+
+```bash
+# Quick deployment to BrightSign player
+make install PLAYER=<player-hostname>
+
+# Then SSH to the player to start the service
+ssh brightsign@<player-hostname>
+/tmp/bs-image-stream-server -file /tmp/screenshot.jpg -port 8080
+```
 
 ### Systemd Service
 
