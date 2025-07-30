@@ -1,8 +1,8 @@
-# BS Frame Monitor Testing Plan
+# bs-image-stream-server Testing Plan
 
 ## Overview
 
-This comprehensive testing plan ensures the BS Frame Monitor operates correctly across all target platforms and use cases. The plan includes automated testing tools, visual verification methods, and performance validation.
+This comprehensive testing plan ensures the bs-image-stream-server operates correctly across all target platforms and use cases. The plan includes automated testing tools, visual verification methods, and performance validation.
 
 ## Test Infrastructure
 
@@ -105,7 +105,7 @@ This comprehensive testing plan ensures the BS Frame Monitor operates correctly 
 **Run with**: `make test-integration`
 
 #### End-to-End Workflow
-- Start frame monitor server
+- Start image stream server
 - Run test feeder program
 - Verify HTTP responses contain expected images
 - Validate ETag behavior
@@ -193,7 +193,7 @@ This comprehensive testing plan ensures the BS Frame Monitor operates correctly 
 
 3. **Manual integration testing**:
    ```bash
-   # Terminal 1: Start frame monitor
+   # Terminal 1: Start image stream server
    make run-debug
    
    # Terminal 2: Start test feeder
@@ -333,4 +333,4 @@ test-images/
 - Consistent naming convention
 - Optimized JPEG quality for testing
 
-This comprehensive testing plan ensures the BS Frame Monitor meets all functional and performance requirements while providing reliable tools for ongoing validation during development.
+This comprehensive testing plan ensures the bs-image-stream-server meets all functional and performance requirements while providing reliable tools for ongoing validation during development.

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "========================================"
-echo "BS Frame Monitor - Test Suite"
+echo "bs-image-stream-server - Test Suite"
 echo "========================================"
 
 set -e

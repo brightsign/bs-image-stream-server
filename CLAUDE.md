@@ -1,10 +1,10 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with the BS Frame Monitor project.
+This file provides guidance to Claude Code (claude.ai/code) when working with the bs-image-stream-server project.
 
 ## Project Overview
 
-The **BS Frame Monitor** is an embedded Linux web server written in Go that provides real-time image streaming capabilities. It monitors a local image file and serves it via HTTP at 30 FPS to web browsers.
+The **bs-image-stream-server** is an embedded Linux web server written in Go that provides real-time image streaming capabilities. It monitors a local image file and serves it via HTTP at 30 FPS to web browsers.
 
 ## Embedded Linux Image Streaming Web Server Implementation Plan
 
@@ -69,7 +69,7 @@ The **BS Frame Monitor** is an embedded Linux web server written in Go that prov
 <!DOCTYPE html>
 <html>
 <head>
-    <title>BrightSign Frame Monitor</title>
+    <title>BrightSign Image Stream Server</title>
     <meta charset="utf-8">
     <style>
         body { 
@@ -138,7 +138,7 @@ The **BS Frame Monitor** is an embedded Linux web server written in Go that prov
             <text x="10" y="25" fill="#ff6b35" font-family="Arial, sans-serif" font-size="18" font-weight="bold">BrightSign</text>
             <circle cx="180" cy="20" r="8" fill="#f7931e"/>
         </svg>
-        <h1 class="title">Frame Monitor</h1>
+        <h1 class="title">Image Stream Server</h1>
     </div>
     
     <div class="frame-container">

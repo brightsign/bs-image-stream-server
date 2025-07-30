@@ -29,7 +29,7 @@ func TestHandleIndex(t *testing.T) {
 	}
 
 	body := w.Body.String()
-	if !strings.Contains(body, "BrightSign Frame Monitor") {
+	if !strings.Contains(body, "BrightSign Image Stream Server") {
 		t.Error("Response should contain page title")
 	}
 

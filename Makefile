@@ -1,4 +1,4 @@
-# BS Frame Monitor Makefile
+# bs-image-stream-server Makefile
 # Build configuration for embedded Linux image streaming server
 
 # Go parameters
@@ -173,7 +173,7 @@ install-dev-deps:
 # Show help
 .PHONY: help
 help:
-	@echo "BS Frame Monitor - Available targets:"
+	@echo "bs-image-stream-server - Available targets:"
 	@echo ""
 	@echo "Build targets:"
 	@echo "  build           - Build binary for current platform and ARM64 player"

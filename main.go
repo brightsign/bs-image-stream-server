@@ -43,7 +43,7 @@ func main() {
 		os.Exit(0)
 	}()
 
-	log.Printf("Starting BS Frame Monitor on port %d, monitoring %s", *port, *filePath)
+	log.Printf("Starting bs-image-stream-server on port %d, monitoring %s", *port, *filePath)
 	if err := srv.Start(); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
