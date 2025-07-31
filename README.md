@@ -8,6 +8,8 @@ This is useful to "see" what the output of the machine vision is with the boundi
 
 The bs-image-stream-server continuously monitors a local image file and serves it via HTTP at 30 FPS.  It specifically watches `/tmp/output.jpg` since that is where the BSMP files write their output.
 
+This is intended for development and testing purposes only.  If you want to include this binary in a BSMP or an extension, you should look at the [BrightSign Extension Template](https://github.com/brightsign/brightsign-extension-template).
+
 ### How It Works
 
 The server operates using a simple but effective architecture:
