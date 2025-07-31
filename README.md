@@ -1,10 +1,12 @@
 # bs-image-stream-server
 
-A high-performance embedded Linux web server written in Go that provides real-time image streaming capabilities for monitoring video output from digital signage and machine vision applications.
+A high-performance embedded Linux web server written in Go that provides real-time image streaming capabilities for monitoring video output from BrightSign players using Machine Vision BrightSign Model Packages (BSMP) such as the [Gaze Detection](https://github.com/brightsign/brightsign-npu-gaze-extension) extension.
+
+This is useful to "see" what the output of the machine vision is with the bounding boxes drawn.
 
 ## Overview
 
-The bs-image-stream-server continuously monitors a local image file and serves it via HTTP at 30 FPS, making it ideal for real-time visual monitoring of digital signage displays, camera feeds, or any application that generates periodic image updates.
+The bs-image-stream-server continuously monitors a local image file and serves it via HTTP at 30 FPS.  It specifically watches `/tmp/output.jpg` since that is where the BSMP files write their output.
 
 ### How It Works
 
@@ -21,7 +23,7 @@ The server operates using a simple but effective architecture:
 
 ## How to Use
 
-### Basic Usage
+### Testing During Development
 
 1. **Start the server** with your image file path:
    ```bash
@@ -194,50 +196,17 @@ curl http://<player>:8080/health
 # Get current image directly
 curl http://<player>:8080/image > current_frame.jpg
 
-# Monitor with cache-aware requests
-curl -H "If-None-Match: \"1234567890-12345\"" http://<player>:8080/image
 ```
 
 ## Practical Examples
 
-### Example 1: Deploy to BrightSign Player
 
-Deploy and monitor a BrightSign player directly:
-
-```bash
-# Deploy to BrightSign player
-make install PLAYER=my-brightsign-player
-
-# SSH to player and start monitoring
-ssh brightsign@my-brightsign-player
-/tmp/bs-image-stream-server -file /tmp/screenshot.jpg -port 8080 &
-
-# From your computer, record the player output
-ffmpeg -i http://my-brightsign-player:8080/video -t 300 -c copy player_recording.mpeg
-
-# View live stream in browser
-open http://my-brightsign-player:8080/
-```
-
-### Example 2: Security Camera Integration
-
-Monitor a camera that saves snapshots and stream to YouTube:
-
-```bash
-# Start monitoring camera
-./bs-image-stream-server -port 8080 -file /var/cameras/front-door.jpg
-
-# Stream live to YouTube (requires stream key)
-ffmpeg -i http://<player>:8080/video -c:v libx264 -b:v 1500k -r 25 \
-  -f flv rtmp://a.rtmp.youtube.com/live2/YOUR_STREAM_KEY
-```
-
-### Example 3: Automated Monitoring and Recording
+### Example 1: Automated Monitoring and Recording
 
 Set up automated recording with rotation:
 
 ```bash
-# Start the server
+# Start the server if testing development
 ./bs-image-stream-server -file /tmp/output.jpg &
 
 # Record 1-hour segments with timestamps
@@ -246,17 +215,6 @@ while true; do
   ffmpeg -i http://<player>:8080/video -t 3600 -c copy "recording_${timestamp}.mpeg"
   sleep 10  # Brief pause between recordings
 done
-```
-
-### Example 4: Load Balancer Configuration
-
-Use the health endpoint for monitoring:
-
-```nginx
-upstream bs_monitor {
-    server <player>:8080;
-    health_check uri=/health;
-}
 ```
 
 ## Project Structure
@@ -312,7 +270,7 @@ bs-image-stream-server/
 
 #### `/` - Web Viewing Interface
 - **Purpose**: Human-friendly web interface for viewing the live image stream
-- **Features**: 
+- **Features**:
   - Auto-refreshes at 30 FPS using JavaScript
   - Clean, branded interface with purple frame
   - BrightSign logo and professional styling
@@ -340,7 +298,7 @@ bs-image-stream-server/
   - Includes ETag header for efficient caching
   - Returns 304 Not Modified if image hasn't changed
   - Ideal for custom applications or embedding
-- **When to use**: 
+- **When to use**:
   - Building custom viewing applications
   - Integrating with other systems
   - Creating image processing pipelines
@@ -348,7 +306,7 @@ bs-image-stream-server/
 
 #### `/health` - System Health Check
 - **Purpose**: Monitor server status
-- **Response format**: 
+- **Response format**:
   ```json
   {
     "status": "ok",
@@ -421,7 +379,7 @@ export PLAYER=my-brightsign-device
 make install
 ```
 
-**Requirements**: 
+**Requirements**:
 - [bscp](https://github.com/gherlein/bs-scp) must be installed
 - Network access to the BrightSign player
 - Player must have SSH enabled

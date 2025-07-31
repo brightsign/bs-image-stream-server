@@ -2,7 +2,7 @@
 # Build configuration for embedded Linux image streaming server
 
 # Player configuration
-PLAYER ?= brightsign
+PLAYER ?= xt5i
 
 # Go parameters
 GOCMD=go
@@ -59,7 +59,11 @@ build-embedded: build-linux build-arm build-arm64
 
 # Install player binary to BrightSign player using bscp
 .PHONY: install
-install: build
+install:
+	@if [ ! -f "$(BINARY_DIR)/$(BINARY_NAME)-player" ]; then \
+		echo "Player binary not found, building..."; \
+		$(MAKE) build; \
+	fi
 	@echo "Installing bs-image-stream-server to player: $(PLAYER)"
 	@if ! command -v bscp >/dev/null 2>&1; then \
 		echo "Error: bscp not found. Please install it from:"; \
@@ -71,12 +75,12 @@ install: build
 		echo "  make install"; \
 		exit 1; \
 	fi
-	@echo "Copying $(BINARY_DIR)/$(BINARY_NAME)-player to $(PLAYER):/tmp/"
-	bscp $(BINARY_DIR)/$(BINARY_NAME)-player $(PLAYER):/tmp/bs-image-stream-server
-	@echo "✓ Installation complete. Binary copied to $(PLAYER):/tmp/bs-image-stream-server"
+	@echo "Copying $(BINARY_DIR)/$(BINARY_NAME)-player to $(PLAYER):"
+	bscp $(BINARY_DIR)/$(BINARY_NAME)-player $(PLAYER):bs-image-stream-server
+	@echo "✓ Installation complete. Binary copied to $(PLAYER):bs-image-stream-server"
 	@echo ""
 	@echo "To start the server on the player, SSH to $(PLAYER) and run:"
-	@echo "  /tmp/bs-image-stream-server -file /tmp/screenshot.jpg -port 8080"
+	@echo "  ./bs-image-stream-server -file /tmp/screenshot.jpg -port 8080"
 
 # Run tests
 .PHONY: test
