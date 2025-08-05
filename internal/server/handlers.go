@@ -111,37 +111,9 @@ func (s *Server) handleMultipartStream(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleMJPEGStream(w http.ResponseWriter, r *http.Request) {
-	// Set proper MJPEG headers for ffmpeg compatibility
-	w.Header().Set("Content-Type", "video/x-motion-jpeg")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Connection", "close")
-	
-	// Stream images at 30 FPS
-	ticker := time.NewTicker(time.Millisecond * 33)
-	defer ticker.Stop()
-	
-	for {
-		select {
-		case <-r.Context().Done():
-			return
-		case <-ticker.C:
-			data, _, _, ok := s.cache.Get()
-			if !ok {
-				continue
-			}
-			
-			// Write raw JPEG data directly
-			_, err := w.Write(data)
-			if err != nil {
-				return
-			}
-			
-			// Flush to send immediately
-			if flusher, ok := w.(http.Flusher); ok {
-				flusher.Flush()
-			}
-		}
-	}
+	// Use the same multipart format as the main stream for consistency
+	// This provides better ffmpeg compatibility
+	s.handleMultipartStream(w, r)
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
