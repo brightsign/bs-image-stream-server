@@ -9,6 +9,7 @@
             padding: 20px; 
             background: #ffffff; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
         }
         .logo-container {
             position: fixed;
@@ -21,8 +22,10 @@
             width: auto;
         }
         .frame-container {
-            max-width: 90%;
-            margin: 80px auto 0 auto; /* Added top margin to accommodate logo */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background: linear-gradient(45deg, #9b59b6, #8e44ad);
             padding: 15px;
             border-radius: 15px;
@@ -35,14 +38,16 @@
             position: relative;
         }
         #image { 
-            width: 100%; 
-            height: auto; 
+            width: 50vw;
+            height: auto;
             display: block; 
             border-radius: 5px;
         }
         .footer {
-            text-align: center;
-            margin-top: 20px;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             color: #666;
             font-size: 12px;
         }
