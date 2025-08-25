@@ -1,6 +1,6 @@
 # bs-image-stream-server
 
-A high-performance embedded Linux web server written in Go that provides real-time image streaming capabilities for monitoring video output from BrightSign players using Machine Vision BrightSign Model Packages (BSMP) such as the [Gaze Detection](https://github.com/brightsign/brightsign-npu-gaze-extension) extension.
+A high-performance embedded Linux web server written in Go that provides real-time image streaming capabilities for monitoring computer vision video output from BrightSign players using Machine Vision BrightSign Model Packages (BSMP) such as the [Gaze Detection](https://github.com/brightsign/brightsign-npu-gaze-extension) extension.
 
 This is useful to "see" what the output of the machine vision is with the bounding boxes drawn.
 
@@ -548,10 +548,6 @@ Input #0, mpjpeg, from 'http://<player>:8080/video':
 3. **ffmpeg connection refused**: Ensure the server is running and accessible
 4. **Low frame rate**: Source file may not be updating at 30 FPS
 
-## License
+## Licensing
 
-[Add your license here]
-
-## Contributing
-
-[Add contributing guidelines here]
+This project is released under the terms of the [Apache 2.0 License](./LICENSE.txt).
