@@ -3,6 +3,7 @@ package server
 import (
 	"embed"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -69,19 +70,22 @@ func (s *Server) handleMultipartStream(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 
+	log.Printf("Video stream started for client %s", r.RemoteAddr)
+
 	// Stream images at 30 FPS
 	ticker := time.NewTicker(time.Millisecond * 33)
 	defer ticker.Stop()
 
 	frameCount := 0
+	startTime := time.Now()
 
 	for {
 		select {
 		case <-r.Context().Done():
 			// Log why the stream ended
-			if r.Context().Err() != nil {
-				// Client disconnected or request cancelled - this is normal
-			}
+			duration := time.Since(startTime)
+			log.Printf("Video stream ended for client %s | Duration: %v | Frames sent: %d | Reason: %v",
+				r.RemoteAddr, duration, frameCount, r.Context().Err())
 			return
 		case <-ticker.C:
 			data, _, _, ok := s.cache.Get()
@@ -93,23 +97,26 @@ func (s *Server) handleMultipartStream(w http.ResponseWriter, r *http.Request) {
 			// Write multipart boundary and headers
 			_, err := w.Write([]byte("--frame\r\n"))
 			if err != nil {
-				// Connection closed by client
+				log.Printf("Video stream write error for client %s (frame %d): %v", r.RemoteAddr, frameCount, err)
 				return
 			}
 
 			_, err = w.Write([]byte(fmt.Sprintf("Content-Type: image/jpeg\r\nContent-Length: %d\r\n\r\n", len(data))))
 			if err != nil {
+				log.Printf("Video stream write error for client %s (frame %d): %v", r.RemoteAddr, frameCount, err)
 				return
 			}
 
 			// Write image data
 			_, err = w.Write(data)
 			if err != nil {
+				log.Printf("Video stream write error for client %s (frame %d): %v", r.RemoteAddr, frameCount, err)
 				return
 			}
 
 			_, err = w.Write([]byte("\r\n"))
 			if err != nil {
+				log.Printf("Video stream write error for client %s (frame %d): %v", r.RemoteAddr, frameCount, err)
 				return
 			}
 

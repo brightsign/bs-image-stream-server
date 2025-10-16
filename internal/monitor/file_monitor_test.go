@@ -20,6 +20,15 @@ func createTempFile(t *testing.T, content []byte) string {
 	return filePath
 }
 
+// createValidJPEG creates minimal valid JPEG data for testing
+// JPEG format: SOI (FF D8) + data + EOI (FF D9)
+func createValidJPEG(payload string) []byte {
+	data := []byte{0xFF, 0xD8} // SOI marker
+	data = append(data, []byte(payload)...)
+	data = append(data, 0xFF, 0xD9) // EOI marker
+	return data
+}
+
 func TestNewFileMonitor(t *testing.T) {
 	cache := cache.NewImageCache()
 	filePath := "/tmp/test.jpg"
@@ -34,22 +43,19 @@ func TestNewFileMonitor(t *testing.T) {
 	if monitor.filePath != filePath {
 		t.Errorf("Expected filePath %s, got %s", filePath, monitor.filePath)
 	}
-
-	if monitor.interval != interval {
-		t.Errorf("Expected interval %v, got %v", interval, monitor.interval)
-	}
 }
 
 func TestFileMonitorDetectsNewFile(t *testing.T) {
 	cache := cache.NewImageCache()
-	testData := []byte("test image content")
+	testData := createValidJPEG("test image content")
 	filePath := createTempFile(t, testData)
 
 	monitor := NewFileMonitor(filePath, cache, time.Millisecond*10)
 	monitor.Start()
 	defer monitor.Stop()
 
-	time.Sleep(time.Millisecond * 50)
+	// Give watcher time to load initial file
+	time.Sleep(time.Millisecond * 100)
 
 	if !cache.HasData() {
 		t.Error("Cache should have data after file monitor starts")
@@ -67,25 +73,27 @@ func TestFileMonitorDetectsNewFile(t *testing.T) {
 
 func TestFileMonitorDetectsFileChanges(t *testing.T) {
 	cache := cache.NewImageCache()
-	initialData := []byte("initial content")
+	initialData := createValidJPEG("initial content")
 	filePath := createTempFile(t, initialData)
 
 	monitor := NewFileMonitor(filePath, cache, time.Millisecond*10)
 	monitor.Start()
 	defer monitor.Stop()
 
-	time.Sleep(time.Millisecond * 50)
+	// Give watcher time to load initial file
+	time.Sleep(time.Millisecond * 100)
 
 	if !cache.HasData() {
 		t.Error("Cache should have initial data")
 	}
 
-	updatedData := []byte("updated content")
+	updatedData := createValidJPEG("updated content")
 	if err := os.WriteFile(filePath, updatedData, 0644); err != nil {
 		t.Fatalf("Failed to update file: %v", err)
 	}
 
-	time.Sleep(time.Millisecond * 50)
+	// Give watcher time to detect and process the change
+	time.Sleep(time.Millisecond * 100)
 
 	data, _, _, ok := cache.Get()
 	if !ok {
@@ -114,13 +122,14 @@ func TestFileMonitorHandlesMissingFile(t *testing.T) {
 
 func TestFileMonitorStopPreventsUpdates(t *testing.T) {
 	cache := cache.NewImageCache()
-	testData := []byte("test content")
+	testData := createValidJPEG("test content")
 	filePath := createTempFile(t, testData)
 
 	monitor := NewFileMonitor(filePath, cache, time.Millisecond*10)
 	monitor.Start()
 
-	time.Sleep(time.Millisecond * 50)
+	// Give watcher time to load initial file
+	time.Sleep(time.Millisecond * 100)
 
 	if !cache.HasData() {
 		t.Error("Cache should have data after start")
@@ -128,12 +137,13 @@ func TestFileMonitorStopPreventsUpdates(t *testing.T) {
 
 	monitor.Stop()
 
-	updatedData := []byte("should not be cached")
+	updatedData := createValidJPEG("should not be cached")
 	if err := os.WriteFile(filePath, updatedData, 0644); err != nil {
 		t.Fatalf("Failed to update file: %v", err)
 	}
 
-	time.Sleep(time.Millisecond * 50)
+	// Give time for any stale events to process
+	time.Sleep(time.Millisecond * 100)
 
 	data, _, _, _ := cache.Get()
 	if string(data) == string(updatedData) {
@@ -143,14 +153,15 @@ func TestFileMonitorStopPreventsUpdates(t *testing.T) {
 
 func TestFileMonitorIgnoresUnchangedFile(t *testing.T) {
 	cache := cache.NewImageCache()
-	testData := []byte("unchanging content")
+	testData := createValidJPEG("unchanging content")
 	filePath := createTempFile(t, testData)
 
 	monitor := NewFileMonitor(filePath, cache, time.Millisecond*10)
 	monitor.Start()
 	defer monitor.Stop()
 
-	time.Sleep(time.Millisecond * 50)
+	// Give watcher time to load initial file
+	time.Sleep(time.Millisecond * 100)
 
 	if !cache.HasData() {
 		t.Error("Cache should have initial data")
@@ -158,7 +169,8 @@ func TestFileMonitorIgnoresUnchangedFile(t *testing.T) {
 
 	_, _, firstModTime, _ := cache.Get()
 
-	time.Sleep(time.Millisecond * 100)
+	// Wait without file changes
+	time.Sleep(time.Millisecond * 200)
 
 	_, _, secondModTime, _ := cache.Get()
 
