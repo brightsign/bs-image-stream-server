@@ -60,11 +60,9 @@ func (fm *FileMonitor) checkAndUpdateImage() {
 		return
 	}
 
-	modTime := stat.ModTime()
-	if modTime.Equal(fm.lastModTime) {
-		return
-	}
-
+	// For video streaming at 30fps, always read the file
+	// Filesystem mtime granularity (typically 1 second) means
+	// rapid frame updates won't change modTime, causing stale frames
 	file, err := os.Open(fm.filePath)
 	if err != nil {
 		log.Printf("Error opening file %s: %v", fm.filePath, err)
@@ -78,11 +76,12 @@ func (fm *FileMonitor) checkAndUpdateImage() {
 		return
 	}
 
+	modTime := stat.ModTime()
 	updateStartTime := time.Now()
 	fm.cache.Update(data, modTime, stat.Size())
 	fm.lastModTime = modTime
 
-	log.Printf("[LATENCY] File change detected and cache updated | File ModTime: %s | Detection Time: %s | Update Duration: %v | Size: %d bytes",
+	log.Printf("[LATENCY] File read and cache updated | File ModTime: %s | Detection Time: %s | Update Duration: %v | Size: %d bytes",
 		modTime.Format("15:04:05.000000"),
 		updateStartTime.Format("15:04:05.000000"),
 		time.Since(updateStartTime),

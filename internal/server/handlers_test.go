@@ -29,12 +29,12 @@ func TestHandleIndex(t *testing.T) {
 	}
 
 	body := w.Body.String()
-	if !strings.Contains(body, "BrightSign Image Stream Server") {
+	if !strings.Contains(body, "BrightSign Video Stream Server") {
 		t.Error("Response should contain page title")
 	}
 
-	if !strings.Contains(body, "setInterval") {
-		t.Error("Response should contain JavaScript for image refresh")
+	if !strings.Contains(body, "/video") {
+		t.Error("Response should contain video stream endpoint")
 	}
 }
 

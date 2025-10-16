@@ -2,6 +2,7 @@ package server
 
 import (
 	"embed"
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -65,47 +66,59 @@ func (s *Server) handleMultipartStream(w http.ResponseWriter, r *http.Request) {
 	// Set multipart/x-mixed-replace header for streaming
 	w.Header().Set("Content-Type", "multipart/x-mixed-replace; boundary=frame")
 	w.Header().Set("Cache-Control", "no-cache")
-	
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+
 	// Stream images at 30 FPS
 	ticker := time.NewTicker(time.Millisecond * 33)
 	defer ticker.Stop()
-	
+
+	frameCount := 0
+
 	for {
 		select {
 		case <-r.Context().Done():
+			// Log why the stream ended
+			if r.Context().Err() != nil {
+				// Client disconnected or request cancelled - this is normal
+			}
 			return
 		case <-ticker.C:
 			data, _, _, ok := s.cache.Get()
 			if !ok {
+				// No image data available yet - wait for next tick
 				continue
 			}
-			
+
 			// Write multipart boundary and headers
 			_, err := w.Write([]byte("--frame\r\n"))
 			if err != nil {
+				// Connection closed by client
 				return
 			}
-			
-			_, err = w.Write([]byte("Content-Type: image/jpeg\r\n\r\n"))
+
+			_, err = w.Write([]byte(fmt.Sprintf("Content-Type: image/jpeg\r\nContent-Length: %d\r\n\r\n", len(data))))
 			if err != nil {
 				return
 			}
-			
+
 			// Write image data
 			_, err = w.Write(data)
 			if err != nil {
 				return
 			}
-			
+
 			_, err = w.Write([]byte("\r\n"))
 			if err != nil {
 				return
 			}
-			
+
 			// Flush to send immediately
 			if flusher, ok := w.(http.Flusher); ok {
 				flusher.Flush()
 			}
+
+			frameCount++
 		}
 	}
 }
