@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>BrightSign Image Stream Server</title>
+    <title>BrightSign Video Stream Server</title>
     <meta charset="utf-8">
     <style>
         body { 
@@ -37,10 +37,10 @@
             border-radius: 8px;
             position: relative;
         }
-        #image { 
+        #video {
             width: 50vw;
             height: auto;
-            display: block; 
+            display: block;
             border-radius: 5px;
         }
         .footer {
@@ -60,7 +60,7 @@
     
     <div class="frame-container">
         <div class="inner-frame">
-            <img id="image" src="/image" alt="Live Image">
+            <img id="video" src="/video" alt="Live Video Stream">
         </div>
     </div>
     
@@ -69,11 +69,8 @@
     </div>
     
     <script>
-        // JavaScript for 30fps refresh with cache busting
-        setInterval(() => {
-            const img = document.getElementById('image');
-            img.src = '/image?' + Date.now();
-        }, 33);
+        // Multipart stream handles 30fps updates automatically
+        // No manual refresh needed - the /video endpoint pushes frames continuously
     </script>
 </body>
 </html>

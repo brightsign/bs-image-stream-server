@@ -78,6 +78,13 @@ func (fm *FileMonitor) checkAndUpdateImage() {
 		return
 	}
 
+	updateStartTime := time.Now()
 	fm.cache.Update(data, modTime, stat.Size())
 	fm.lastModTime = modTime
+
+	log.Printf("[LATENCY] File change detected and cache updated | File ModTime: %s | Detection Time: %s | Update Duration: %v | Size: %d bytes",
+		modTime.Format("15:04:05.000000"),
+		updateStartTime.Format("15:04:05.000000"),
+		time.Since(updateStartTime),
+		len(data))
 }
