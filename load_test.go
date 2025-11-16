@@ -16,7 +16,7 @@ import (
 )
 
 func BenchmarkImageCacheGet(b *testing.B) {
-	cache := cache.NewImageCache()
+	cache := cache.NewImageCache(false)
 	testData := bytes.Repeat([]byte("test"), 1000)
 	modTime := time.Now()
 
@@ -31,7 +31,7 @@ func BenchmarkImageCacheGet(b *testing.B) {
 }
 
 func BenchmarkImageCacheUpdate(b *testing.B) {
-	cache := cache.NewImageCache()
+	cache := cache.NewImageCache(false)
 	testData := bytes.Repeat([]byte("test"), 1000)
 
 	b.ResetTimer()
@@ -50,8 +50,8 @@ func BenchmarkFileMonitorWithFrequentUpdates(b *testing.B) {
 		b.Fatalf("Failed to create test file: %v", err)
 	}
 
-	cache := cache.NewImageCache()
-	fileMonitor := monitor.NewFileMonitor(testFile, cache, time.Millisecond*33)
+	cache := cache.NewImageCache(false)
+	fileMonitor := monitor.NewFileMonitor(testFile, cache, time.Millisecond*33, false)
 
 	fileMonitor.Start()
 	defer fileMonitor.Stop()
@@ -68,7 +68,7 @@ func BenchmarkFileMonitorWithFrequentUpdates(b *testing.B) {
 }
 
 func BenchmarkHTTPImageHandler(b *testing.B) {
-	cache := cache.NewImageCache()
+	cache := cache.NewImageCache(false)
 	testData := bytes.Repeat([]byte("image_data"), 10000)
 	modTime := time.Now()
 
@@ -98,7 +98,7 @@ func BenchmarkHTTPImageHandler(b *testing.B) {
 }
 
 func TestConcurrentImageRequests(t *testing.T) {
-	cache := cache.NewImageCache()
+	cache := cache.NewImageCache(false)
 	testData := bytes.Repeat([]byte("concurrent_test"), 5000)
 	modTime := time.Now()
 
@@ -183,8 +183,8 @@ func TestMemoryUsageUnderLoad(t *testing.T) {
 		t.Fatalf("Failed to create large test file: %v", err)
 	}
 
-	cache := cache.NewImageCache()
-	fileMonitor := monitor.NewFileMonitor(testFile, cache, time.Millisecond*33)
+	cache := cache.NewImageCache(false)
+	fileMonitor := monitor.NewFileMonitor(testFile, cache, time.Millisecond*33, false)
 
 	fileMonitor.Start()
 	defer fileMonitor.Stop()
@@ -237,8 +237,8 @@ func TestSystemStabilityUnder30FPS(t *testing.T) {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
-	cache := cache.NewImageCache()
-	fileMonitor := monitor.NewFileMonitor(testFile, cache, time.Millisecond*33)
+	cache := cache.NewImageCache(false)
+	fileMonitor := monitor.NewFileMonitor(testFile, cache, time.Millisecond*33, false)
 
 	fileMonitor.Start()
 	defer fileMonitor.Stop()

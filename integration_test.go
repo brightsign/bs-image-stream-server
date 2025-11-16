@@ -29,9 +29,9 @@ func TestFullSystemIntegration(t *testing.T) {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
-	imageCache := cache.NewImageCache()
-	fileMonitor := monitor.NewFileMonitor(testFile, imageCache, time.Millisecond*10)
-	srv := server.NewServer(0, imageCache)
+	imageCache := cache.NewImageCache(false)
+	fileMonitor := monitor.NewFileMonitor(testFile, imageCache, time.Millisecond*10, false)
+	srv := server.NewServer(0, imageCache, false)
 
 	fileMonitor.Start()
 	defer fileMonitor.Stop()
@@ -168,8 +168,8 @@ func TestSystemPerformance(t *testing.T) {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
-	imageCache := cache.NewImageCache()
-	fileMonitor := monitor.NewFileMonitor(testFile, imageCache, time.Millisecond*33)
+	imageCache := cache.NewImageCache(false)
+	fileMonitor := monitor.NewFileMonitor(testFile, imageCache, time.Millisecond*33, false)
 
 	fileMonitor.Start()
 	defer fileMonitor.Stop()
@@ -204,8 +204,8 @@ func TestSystemResourceUsage(t *testing.T) {
 		t.Fatalf("Failed to create large test file: %v", err)
 	}
 
-	imageCache := cache.NewImageCache()
-	fileMonitor := monitor.NewFileMonitor(testFile, imageCache, time.Millisecond*33)
+	imageCache := cache.NewImageCache(false)
+	fileMonitor := monitor.NewFileMonitor(testFile, imageCache, time.Millisecond*33, false)
 
 	fileMonitor.Start()
 	defer fileMonitor.Stop()

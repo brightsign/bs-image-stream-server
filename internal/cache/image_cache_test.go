@@ -7,7 +7,7 @@ import (
 )
 
 func TestNewImageCache(t *testing.T) {
-	cache := NewImageCache()
+	cache := NewImageCache(false)
 	if cache == nil {
 		t.Fatal("NewImageCache returned nil")
 	}
@@ -22,7 +22,7 @@ func TestNewImageCache(t *testing.T) {
 }
 
 func TestImageCacheUpdate(t *testing.T) {
-	cache := NewImageCache()
+	cache := NewImageCache(false)
 	testData := []byte("test image data")
 	modTime := time.Now()
 	fileSize := int64(len(testData))
@@ -56,7 +56,7 @@ func TestImageCacheUpdate(t *testing.T) {
 }
 
 func TestImageCacheDataIsolation(t *testing.T) {
-	cache := NewImageCache()
+	cache := NewImageCache(false)
 	testData := []byte("test image data")
 	modTime := time.Now()
 	fileSize := int64(len(testData))
@@ -79,7 +79,7 @@ func TestImageCacheDataIsolation(t *testing.T) {
 }
 
 func TestImageCacheMultipleUpdates(t *testing.T) {
-	cache := NewImageCache()
+	cache := NewImageCache(false)
 
 	testData1 := []byte("first image")
 	modTime1 := time.Now()
@@ -104,7 +104,7 @@ func TestImageCacheMultipleUpdates(t *testing.T) {
 }
 
 func TestImageCacheConcurrency(t *testing.T) {
-	cache := NewImageCache()
+	cache := NewImageCache(false)
 	done := make(chan bool)
 
 	go func() {
