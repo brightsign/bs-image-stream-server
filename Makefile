@@ -14,7 +14,7 @@ GOMOD=$(GOCMD) mod
 
 # Binary names
 BINARY_NAME=image-stream-server
-BINARY_DIR=cmd
+BINARY_DIR=bin
 BINARY_PATH=$(BINARY_DIR)/$(BINARY_NAME)
 BINARY_UNIX=$(BINARY_DIR)/$(BINARY_NAME)-amd64
 BINARY_ARM=$(BINARY_DIR)/$(BINARY_NAME)-arm
@@ -41,11 +41,11 @@ build-linux:
 	@mkdir -p $(BINARY_DIR)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) $(BUILD_FLAGS) $(LDFLAGS) -o $(BINARY_UNIX) .
 
-# Build for ARM (Raspberry Pi 3, etc.)
+# Build for ARM64 (64-bit ARM)
 .PHONY: build-arm
 build-arm:
 	@mkdir -p $(BINARY_DIR)
-	CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 $(GOBUILD) $(BUILD_FLAGS) $(LDFLAGS) -o $(BINARY_ARM) .
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(GOBUILD) $(BUILD_FLAGS) $(LDFLAGS) -o $(BINARY_ARM) .
 
 # Build for ARM64 (Raspberry Pi 4, etc.)
 .PHONY: build-arm64
