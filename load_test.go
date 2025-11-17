@@ -15,9 +15,18 @@ import (
 	"github.com/bs-frame-monitor/internal/monitor"
 )
 
+// createValidJPEG creates minimal valid JPEG data for testing
+// JPEG format: SOI (FF D8) + data + EOI (FF D9)
+func createValidJPEG(payload []byte) []byte {
+	data := []byte{0xFF, 0xD8} // SOI marker
+	data = append(data, payload...)
+	data = append(data, 0xFF, 0xD9) // EOI marker
+	return data
+}
+
 func BenchmarkImageCacheGet(b *testing.B) {
-	cache := cache.NewImageCache()
-	testData := bytes.Repeat([]byte("test"), 1000)
+	cache := cache.NewImageCache(false)
+	testData := createValidJPEG(bytes.Repeat([]byte("test"), 1000))
 	modTime := time.Now()
 
 	cache.Update(testData, modTime, int64(len(testData)))
@@ -31,8 +40,8 @@ func BenchmarkImageCacheGet(b *testing.B) {
 }
 
 func BenchmarkImageCacheUpdate(b *testing.B) {
-	cache := cache.NewImageCache()
-	testData := bytes.Repeat([]byte("test"), 1000)
+	cache := cache.NewImageCache(false)
+	testData := createValidJPEG(bytes.Repeat([]byte("test"), 1000))
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -45,13 +54,13 @@ func BenchmarkFileMonitorWithFrequentUpdates(b *testing.B) {
 	tmpDir := b.TempDir()
 	testFile := filepath.Join(tmpDir, "bench.jpg")
 
-	testData := bytes.Repeat([]byte("benchmark"), 1000)
+	testData := createValidJPEG(bytes.Repeat([]byte("benchmark"), 1000))
 	if err := os.WriteFile(testFile, testData, 0644); err != nil {
 		b.Fatalf("Failed to create test file: %v", err)
 	}
 
-	cache := cache.NewImageCache()
-	fileMonitor := monitor.NewFileMonitor(testFile, cache, time.Millisecond*33)
+	cache := cache.NewImageCache(false)
+	fileMonitor := monitor.NewFileMonitor(testFile, cache, time.Millisecond*33, false)
 
 	fileMonitor.Start()
 	defer fileMonitor.Stop()
@@ -68,8 +77,8 @@ func BenchmarkFileMonitorWithFrequentUpdates(b *testing.B) {
 }
 
 func BenchmarkHTTPImageHandler(b *testing.B) {
-	cache := cache.NewImageCache()
-	testData := bytes.Repeat([]byte("image_data"), 10000)
+	cache := cache.NewImageCache(false)
+	testData := createValidJPEG(bytes.Repeat([]byte("image_data"), 10000))
 	modTime := time.Now()
 
 	cache.Update(testData, modTime, int64(len(testData)))
@@ -98,8 +107,8 @@ func BenchmarkHTTPImageHandler(b *testing.B) {
 }
 
 func TestConcurrentImageRequests(t *testing.T) {
-	cache := cache.NewImageCache()
-	testData := bytes.Repeat([]byte("concurrent_test"), 5000)
+	cache := cache.NewImageCache(false)
+	testData := createValidJPEG(bytes.Repeat([]byte("concurrent_test"), 5000))
 	modTime := time.Now()
 
 	cache.Update(testData, modTime, int64(len(testData)))
@@ -178,13 +187,13 @@ func TestMemoryUsageUnderLoad(t *testing.T) {
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "memory_test.jpg")
 
-	largeImageData := bytes.Repeat([]byte("LARGE_IMAGE_PIXEL_DATA"), 50000)
+	largeImageData := createValidJPEG(bytes.Repeat([]byte("LARGE_IMAGE_PIXEL_DATA"), 50000))
 	if err := os.WriteFile(testFile, largeImageData, 0644); err != nil {
 		t.Fatalf("Failed to create large test file: %v", err)
 	}
 
-	cache := cache.NewImageCache()
-	fileMonitor := monitor.NewFileMonitor(testFile, cache, time.Millisecond*33)
+	cache := cache.NewImageCache(false)
+	fileMonitor := monitor.NewFileMonitor(testFile, cache, time.Millisecond*33, false)
 
 	fileMonitor.Start()
 	defer fileMonitor.Stop()
@@ -232,13 +241,13 @@ func TestSystemStabilityUnder30FPS(t *testing.T) {
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "fps_test.jpg")
 
-	baseData := bytes.Repeat([]byte("30FPS_TEST"), 1000)
+	baseData := createValidJPEG(bytes.Repeat([]byte("30FPS_TEST"), 1000))
 	if err := os.WriteFile(testFile, baseData, 0644); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
-	cache := cache.NewImageCache()
-	fileMonitor := monitor.NewFileMonitor(testFile, cache, time.Millisecond*33)
+	cache := cache.NewImageCache(false)
+	fileMonitor := monitor.NewFileMonitor(testFile, cache, time.Millisecond*33, false)
 
 	fileMonitor.Start()
 	defer fileMonitor.Stop()

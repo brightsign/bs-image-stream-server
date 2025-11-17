@@ -77,7 +77,7 @@ func addLabel(img *image.RGBA, x, y int, label string) {
 // Simple end-to-end latency test
 func runEndToEndTest() {
 	fmt.Println("\n=== End-to-End Latency Test ===")
-	fmt.Println("This test measures the time from file write to stream receipt\n")
+	fmt.Println("This test measures the time from file write to stream receipt")
 
 	// Create initial image
 	generator := &ImageGenerator{}

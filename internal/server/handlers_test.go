@@ -11,8 +11,8 @@ import (
 )
 
 func TestHandleIndex(t *testing.T) {
-	cache := cache.NewImageCache()
-	server := NewServer(8080, cache)
+	cache := cache.NewImageCache(false)
+	server := NewServer(8080, cache, false)
 
 	req := httptest.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()
@@ -39,8 +39,8 @@ func TestHandleIndex(t *testing.T) {
 }
 
 func TestHandleIndexNotFound(t *testing.T) {
-	cache := cache.NewImageCache()
-	server := NewServer(8080, cache)
+	cache := cache.NewImageCache(false)
+	server := NewServer(8080, cache, false)
 
 	req := httptest.NewRequest("GET", "/nonexistent", nil)
 	w := httptest.NewRecorder()
@@ -53,8 +53,8 @@ func TestHandleIndexNotFound(t *testing.T) {
 }
 
 func TestHandleImageNoData(t *testing.T) {
-	cache := cache.NewImageCache()
-	server := NewServer(8080, cache)
+	cache := cache.NewImageCache(false)
+	server := NewServer(8080, cache, false)
 
 	req := httptest.NewRequest("GET", "/image", nil)
 	w := httptest.NewRecorder()
@@ -67,13 +67,13 @@ func TestHandleImageNoData(t *testing.T) {
 }
 
 func TestHandleImageWithData(t *testing.T) {
-	cache := cache.NewImageCache()
+	cache := cache.NewImageCache(false)
 	testData := []byte("fake jpeg data")
 	modTime := time.Now()
 
 	cache.Update(testData, modTime, int64(len(testData)))
 
-	server := NewServer(8080, cache)
+	server := NewServer(8080, cache, false)
 
 	req := httptest.NewRequest("GET", "/image", nil)
 	w := httptest.NewRecorder()
@@ -110,13 +110,13 @@ func TestHandleImageWithData(t *testing.T) {
 }
 
 func TestHandleImageNotModified(t *testing.T) {
-	cache := cache.NewImageCache()
+	cache := cache.NewImageCache(false)
 	testData := []byte("fake jpeg data")
 	modTime := time.Now()
 
 	cache.Update(testData, modTime, int64(len(testData)))
 
-	server := NewServer(8080, cache)
+	server := NewServer(8080, cache, false)
 
 	data, etag, _, _ := cache.Get()
 	if len(data) == 0 {
@@ -139,8 +139,8 @@ func TestHandleImageNotModified(t *testing.T) {
 }
 
 func TestHandleHealth(t *testing.T) {
-	cache := cache.NewImageCache()
-	server := NewServer(8080, cache)
+	cache := cache.NewImageCache(false)
+	server := NewServer(8080, cache, false)
 
 	req := httptest.NewRequest("GET", "/health", nil)
 	w := httptest.NewRecorder()
@@ -167,13 +167,13 @@ func TestHandleHealth(t *testing.T) {
 }
 
 func TestHandleHealthWithImage(t *testing.T) {
-	cache := cache.NewImageCache()
+	cache := cache.NewImageCache(false)
 	testData := []byte("test image")
 	modTime := time.Now()
 
 	cache.Update(testData, modTime, int64(len(testData)))
 
-	server := NewServer(8080, cache)
+	server := NewServer(8080, cache, false)
 
 	req := httptest.NewRequest("GET", "/health", nil)
 	w := httptest.NewRecorder()

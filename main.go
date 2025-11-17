@@ -23,15 +23,16 @@ func main() {
 
 	if *debug {
 		log.SetFlags(log.LstdFlags | log.Lshortfile)
+		log.Printf("[MAIN] Debug logging enabled")
 	}
 
-	imageCache := cache.NewImageCache()
-	fileMonitor := monitor.NewFileMonitor(*filePath, imageCache, time.Millisecond*33)
+	imageCache := cache.NewImageCache(*debug)
+	fileMonitor := monitor.NewFileMonitor(*filePath, imageCache, time.Millisecond*33, *debug)
 
 	fileMonitor.Start()
 	defer fileMonitor.Stop()
 
-	srv := server.NewServer(*port, imageCache)
+	srv := server.NewServer(*port, imageCache, *debug)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)

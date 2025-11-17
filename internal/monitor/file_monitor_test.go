@@ -30,11 +30,11 @@ func createValidJPEG(payload string) []byte {
 }
 
 func TestNewFileMonitor(t *testing.T) {
-	cache := cache.NewImageCache()
+	cache := cache.NewImageCache(false)
 	filePath := "/tmp/test.jpg"
 	interval := time.Millisecond * 50
 
-	monitor := NewFileMonitor(filePath, cache, interval)
+	monitor := NewFileMonitor(filePath, cache, interval, false)
 
 	if monitor == nil {
 		t.Fatal("NewFileMonitor returned nil")
@@ -46,11 +46,11 @@ func TestNewFileMonitor(t *testing.T) {
 }
 
 func TestFileMonitorDetectsNewFile(t *testing.T) {
-	cache := cache.NewImageCache()
+	cache := cache.NewImageCache(false)
 	testData := createValidJPEG("test image content")
 	filePath := createTempFile(t, testData)
 
-	monitor := NewFileMonitor(filePath, cache, time.Millisecond*10)
+	monitor := NewFileMonitor(filePath, cache, time.Millisecond*10, false)
 	monitor.Start()
 	defer monitor.Stop()
 
@@ -72,11 +72,11 @@ func TestFileMonitorDetectsNewFile(t *testing.T) {
 }
 
 func TestFileMonitorDetectsFileChanges(t *testing.T) {
-	cache := cache.NewImageCache()
+	cache := cache.NewImageCache(false)
 	initialData := createValidJPEG("initial content")
 	filePath := createTempFile(t, initialData)
 
-	monitor := NewFileMonitor(filePath, cache, time.Millisecond*10)
+	monitor := NewFileMonitor(filePath, cache, time.Millisecond*10, false)
 	monitor.Start()
 	defer monitor.Stop()
 
@@ -106,10 +106,10 @@ func TestFileMonitorDetectsFileChanges(t *testing.T) {
 }
 
 func TestFileMonitorHandlesMissingFile(t *testing.T) {
-	cache := cache.NewImageCache()
+	cache := cache.NewImageCache(false)
 	filePath := "/tmp/nonexistent.jpg"
 
-	monitor := NewFileMonitor(filePath, cache, time.Millisecond*10)
+	monitor := NewFileMonitor(filePath, cache, time.Millisecond*10, false)
 	monitor.Start()
 	defer monitor.Stop()
 
@@ -121,11 +121,11 @@ func TestFileMonitorHandlesMissingFile(t *testing.T) {
 }
 
 func TestFileMonitorStopPreventsUpdates(t *testing.T) {
-	cache := cache.NewImageCache()
+	cache := cache.NewImageCache(false)
 	testData := createValidJPEG("test content")
 	filePath := createTempFile(t, testData)
 
-	monitor := NewFileMonitor(filePath, cache, time.Millisecond*10)
+	monitor := NewFileMonitor(filePath, cache, time.Millisecond*10, false)
 	monitor.Start()
 
 	// Give watcher time to load initial file
@@ -152,11 +152,11 @@ func TestFileMonitorStopPreventsUpdates(t *testing.T) {
 }
 
 func TestFileMonitorIgnoresUnchangedFile(t *testing.T) {
-	cache := cache.NewImageCache()
+	cache := cache.NewImageCache(false)
 	testData := createValidJPEG("unchanging content")
 	filePath := createTempFile(t, testData)
 
-	monitor := NewFileMonitor(filePath, cache, time.Millisecond*10)
+	monitor := NewFileMonitor(filePath, cache, time.Millisecond*10, false)
 	monitor.Start()
 	defer monitor.Stop()
 

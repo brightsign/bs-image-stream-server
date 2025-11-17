@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -17,7 +16,10 @@ import (
 )
 
 func createTestJPEG(content string) []byte {
-	return []byte(fmt.Sprintf("FAKE_JPEG_HEADER_%s_END", content))
+	data := []byte{0xFF, 0xD8} // SOI marker
+	data = append(data, []byte(content)...)
+	data = append(data, 0xFF, 0xD9) // EOI marker
+	return data
 }
 
 func TestFullSystemIntegration(t *testing.T) {
@@ -29,9 +31,9 @@ func TestFullSystemIntegration(t *testing.T) {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
-	imageCache := cache.NewImageCache()
-	fileMonitor := monitor.NewFileMonitor(testFile, imageCache, time.Millisecond*10)
-	srv := server.NewServer(0, imageCache)
+	imageCache := cache.NewImageCache(false)
+	fileMonitor := monitor.NewFileMonitor(testFile, imageCache, time.Millisecond*10, false)
+	srv := server.NewServer(0, imageCache, false)
 
 	fileMonitor.Start()
 	defer fileMonitor.Stop()
@@ -168,8 +170,8 @@ func TestSystemPerformance(t *testing.T) {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
-	imageCache := cache.NewImageCache()
-	fileMonitor := monitor.NewFileMonitor(testFile, imageCache, time.Millisecond*33)
+	imageCache := cache.NewImageCache(false)
+	fileMonitor := monitor.NewFileMonitor(testFile, imageCache, time.Millisecond*33, false)
 
 	fileMonitor.Start()
 	defer fileMonitor.Stop()
@@ -199,13 +201,14 @@ func TestSystemResourceUsage(t *testing.T) {
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "resource_test.jpg")
 
-	largeContent := bytes.Repeat([]byte("LARGE_IMAGE_DATA"), 10000)
+	payload := bytes.Repeat([]byte("LARGE_IMAGE_DATA"), 10000)
+	largeContent := createTestJPEG(string(payload))
 	if err := os.WriteFile(testFile, largeContent, 0644); err != nil {
 		t.Fatalf("Failed to create large test file: %v", err)
 	}
 
-	imageCache := cache.NewImageCache()
-	fileMonitor := monitor.NewFileMonitor(testFile, imageCache, time.Millisecond*33)
+	imageCache := cache.NewImageCache(false)
+	fileMonitor := monitor.NewFileMonitor(testFile, imageCache, time.Millisecond*33, false)
 
 	fileMonitor.Start()
 	defer fileMonitor.Stop()
