@@ -1,6 +1,8 @@
-# bs-image-stream-server
+# BrightSign NPU Image Stream Server 
 
-A high-performance embedded Linux web server written in Go that provides real-time image streaming capabilities for monitoring computer vision video output from BrightSign players using Machine Vision BrightSign Model Packages (BSMP) such as the [Gaze Detection](https://github.com/brightsign/brightsign-npu-gaze-extension) extension.
+This is a TEST PROGRAM for seeing the output of NPU processing if using BrightSign NPU extensions (BrightSign Model Packages, or BSMP) on a supported player.
+
+This is a high-performance embedded Linux web server written in Go that provides real-time image streaming capabilities for monitoring computer vision video output from BrightSign players using Machine Vision BrightSign Model Packages (BSMP) such as the [Gaze Detection](https://github.com/brightsign/brightsign-npu-gaze-extension) extension.
 
 This is useful to "see" what the output of the machine vision is with the bounding boxes drawn.
 
