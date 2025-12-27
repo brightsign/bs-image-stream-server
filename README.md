@@ -445,7 +445,7 @@ make load-test
 
 ## Deployment
 
-### BrightSign Player Deployment
+### BrightSign Player Deployment - REQUIRES AN "INSECURE" PLAYER!
 
 Use the built-in deployment system:
 
