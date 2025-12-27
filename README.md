@@ -159,14 +159,6 @@ ffmpeg -i http://<player>:8080/video -r 25 -c:v libx264 output.mp4
 Use the video stream with streaming platforms:
 
 ```bash
-# Stream to YouTube Live (requires stream key)
-ffmpeg -i http://<player>:8080/video -c:v libx264 -b:v 2500k -r 30 \
-  -f flv rtmp://a.rtmp.youtube.com/live2/YOUR_STREAM_KEY
-
-# Stream to Twitch (requires stream key)
-ffmpeg -i http://<player>:8080/video -c:v libx264 -b:v 2500k -r 30 \
-  -f flv rtmp://live.twitch.tv/app/YOUR_STREAM_KEY
-
 # Re-stream to local RTMP server
 ffmpeg -i http://<player>:8080/video -c:v libx264 -f flv rtmp://<rtmp-server>/live/stream
 ```
@@ -178,12 +170,6 @@ Embed or integrate the stream in applications:
 ```bash
 # View in VLC media player
 vlc http://<player>:8080/video
-
-# Use with OBS Studio
-# Add "Media Source" → Input: http://<player>:8080/video
-
-# Embed in HTML page
-echo '<img src="http://<player>:8080/video" alt="Live Stream">' > viewer.html
 
 # Use with curl for testing
 curl -N http://<player>:8080/video > stream_test.mjpeg
@@ -275,39 +261,6 @@ The binary will be created at `bin/streamtest`.
    ./bin/bs-image-stream-server
    ```
 
-3. Open your browser to `http://localhost:8080` to view the video stream.
-
-## Project Structure
-
-```
-bs-image-stream-server/
-├── CLAUDE.md                      # Claude Code guidance and implementation plan
-├── Makefile                       # Build automation and tasks
-├── README.md                      # This file
-├── go.mod                         # Go module definition
-├── main.go                        # Application entry point
-├── bin/                           # Built binaries
-├── streamtest/
-│   └── main.go                    # Video frame extractor utility
-├── internal/
-│   ├── cache/
-│   │   ├── image_cache.go         # Thread-safe image caching
-│   │   └── image_cache_test.go    # Cache unit tests
-│   ├── monitor/
-│   │   ├── file_monitor.go        # 30 FPS file monitoring
-│   │   └── file_monitor_test.go   # Monitor unit tests
-│   ├── server/
-│   │   ├── server.go              # HTTP server setup
-│   │   ├── handlers.go            # HTTP request handlers
-│   │   ├── handlers_test.go       # Handler unit tests
-│   │   └── static/
-│   │       └── index.html         # BrightSign-branded web interface
-│   └── testutil/
-│       └── image_generator.go     # Test image generation utilities
-├── integration_test.go            # End-to-end integration tests
-├── load_test.go                   # Performance load testing
-└── test-plan.md                   # Comprehensive test plan
-```
 
 ## API Endpoints
 
