@@ -4,7 +4,7 @@ This is a TEST PROGRAM for seeing the output of NPU processing if using BrightSi
 
 This is a high-performance embedded Linux web server written in Go that provides real-time image streaming capabilities for monitoring computer vision video output from BrightSign players using Machine Vision BrightSign Model Packages (BSMP) such as the [Gaze Detection](https://github.com/brightsign/brightsign-npu-gaze-extension) extension.
 
-NOT RECOMMENDED FOR PRODUCTION USE
+NOT RECOMMENDED FOR PRODUCTION USE!
 
 ## Overview
 
