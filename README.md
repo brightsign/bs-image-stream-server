@@ -219,6 +219,64 @@ while true; do
 done
 ```
 
+## streamtest - Video Frame Extractor
+
+The `streamtest` utility extracts frames from MP4 video files and writes them to `/tmp/output.jpg` at the video's native frame rate. This is useful for testing the image stream server without a live camera or BrightSign player.
+
+### Prerequisites
+
+ffmpeg must be installed on your system:
+
+```bash
+sudo apt install -y ffmpeg
+```
+
+### Building streamtest
+
+```bash
+make streamtest
+```
+
+The binary will be created at `bin/streamtest`.
+
+### Usage
+
+```bash
+# Basic usage - play video once
+./bin/streamtest -file /path/to/video.mp4
+
+# Loop video continuously
+./bin/streamtest -file /path/to/video.mp4 -loop
+
+# Verbose output with per-frame details
+./bin/streamtest -file /path/to/video.mp4 -verbose
+
+# Combined options
+./bin/streamtest -file /path/to/video.mp4 -loop -verbose
+```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `-file <path>` | Path to MP4 video file (required) |
+| `-loop` | Loop video playback continuously |
+| `-verbose` | Print detailed frame information |
+
+### Example Workflow
+
+1. Start streamtest with a video file:
+   ```bash
+   ./bin/streamtest -file ~/sample-video.mp4 -loop
+   ```
+
+2. In another terminal, start the image stream server:
+   ```bash
+   ./bin/bs-image-stream-server
+   ```
+
+3. Open your browser to `http://localhost:8080` to view the video stream.
+
 ## Project Structure
 
 ```
@@ -228,6 +286,9 @@ bs-image-stream-server/
 ├── README.md                      # This file
 ├── go.mod                         # Go module definition
 ├── main.go                        # Application entry point
+├── bin/                           # Built binaries
+├── streamtest/
+│   └── main.go                    # Video frame extractor utility
 ├── internal/
 │   ├── cache/
 │   │   ├── image_cache.go         # Thread-safe image caching
