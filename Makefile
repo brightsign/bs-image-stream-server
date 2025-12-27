@@ -51,6 +51,12 @@ build-arm64:
 .PHONY: build-embedded
 build-embedded: build-linux build-arm64
 
+# Build streamtest tool
+.PHONY: build-streamtest
+build-streamtest:
+	@echo "Building streamtest..."
+	@cd streamtest && $(MAKE) build
+
 # Install player binary to BrightSign player using bscp
 .PHONY: install
 install:
@@ -202,6 +208,7 @@ help:
 	@echo "  build-linux     - Build for Linux x86_64"
 	@echo "  build-arm64     - Build for ARM64 (Raspberry Pi 4)"
 	@echo "  build-embedded  - Build all embedded targets"
+	@echo "  build-streamtest - Build streamtest video testing tool"
 	@echo "  install         - Build and install player binary to BrightSign (requires bscp)"
 	@echo ""
 	@echo "Development targets:"
