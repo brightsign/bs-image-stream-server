@@ -308,7 +308,7 @@ bs-image-stream-server/
   - Works with VLC, OBS, and other video software
 - **When to use**:
   - Browser viewing without web interface
-  - Video recording with ffmpeg (`ffmpeg -i http://<PLAYER_IP>/video -c copy output.mpeg`)
+  - Video recording with ffmpeg (`ffmpeg -i http://<PLAYER_IP>:8080/video -c copy output.mpeg`)
   - Embedding in other applications
   - Streaming to platforms (YouTube, Twitch, etc.)
 
