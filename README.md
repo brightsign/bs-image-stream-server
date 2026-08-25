@@ -97,7 +97,7 @@ you want when debugging an installed extension.
 
 ```bash
 # Clone the repository
-git clone git@github.com:brightsign/bs-image-stream-server.git
+git clone https://github.com/brightsign/bs-image-stream-server.git
 cd bs-image-stream-server
 
 # Build the application
