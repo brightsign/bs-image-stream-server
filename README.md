@@ -1,6 +1,8 @@
 # bs-image-stream-server
 
-A high-performance embedded Linux web server written in Go that provides real-time image streaming capabilities for monitoring computer vision video output from BrightSign players using Machine Vision BrightSign Model Packages (BSMP) such as the [Gaze Detection](https://github.com/brightsign/brightsign-npu-gaze-extension) extension.
+A high-performance embedded Linux web server written in Go that provides real-time image streaming capabilities for monitoring computer vision video output from BrightSign players using Machine Vision BrightSign Model Packages (BSMP) such as
+[Argus](https://github.com/brightsign/argus-audience-measurement-extension) or the
+[Gaze Detection](https://github.com/brightsign/brightsign-npu-gaze-extension) extension.
 
 This is useful to "see" what the output of the machine vision is with the bounding boxes drawn.
 
@@ -8,7 +10,7 @@ This is useful to "see" what the output of the machine vision is with the boundi
 
 The bs-image-stream-server continuously monitors a local image file and serves it via HTTP at 30 FPS.  It specifically watches `/tmp/output.jpg` since that is where the BSMP files write their output.
 
-This is intended for development and testing purposes only.  If you want to include this binary in a BSMP or an extension, you should look at the [BrightSign Extension Template](https://github.com/brightsign/brightsign-extension-template).
+This is intended for development and testing purposes only.  If you want to include this binary in a BSMP or an extension, you should look at the [BrightSign Extension Template](https://github.com/BrightDevelopers/extension-template).
 
 ### How It Works
 
@@ -23,6 +25,23 @@ The server operates using a simple but effective architecture:
    - **Raw Image** (`/image`): Direct JPEG access with HTTP caching headers
 5. **Zero Dependencies**: Single binary with all assets embedded - no external files needed
 
+### A note on ports
+
+This server defaults to port **8080** when you run the binary yourself. The BSMP extensions that
+bundle it (Argus, gaze, object, voice) start it on port **20200** instead, set through the player
+registry:
+
+```bash
+# Disable the image stream server
+registry write networking bs-image-stream-server-port 0
+
+# Enable on the extension default port
+registry write networking bs-image-stream-server-port 20200
+```
+
+So `http://<PLAYER_IP>:8080/` is the standalone default and `http://<PLAYER_IP>:20200/` is what
+you want when debugging an installed extension.
+
 ## How to Use
 
 ### Testing During Development
@@ -33,11 +52,11 @@ The server operates using a simple but effective architecture:
    ```
 
 2. **View the live stream** in your browser:
-   - Navigate to `http://<player>:8080/` or `http://<player>:8080/video`
+   - Navigate to `http://<PLAYER_IP>:8080/` or `http://<PLAYER_IP>:8080/video`
    - The image will automatically refresh at 30 FPS
 
 3. **Direct image access** for integration:
-   - Access `http://<player>:8080/image` to get the raw JPEG data
+   - Access `http://<PLAYER_IP>:8080/image` to get the raw JPEG data
    - Supports ETag headers for efficient caching
 
 ### Common Use Cases
@@ -78,7 +97,7 @@ The server operates using a simple but effective architecture:
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/brightsign/bs-image-stream-server.git
 cd bs-image-stream-server
 
 # Build the application
@@ -127,10 +146,10 @@ Start the server and view the stream in your browser:
 ./bs-image-stream-server -file /path/to/image.jpg -port 8080
 
 # View in browser with web interface
-open http://<player>:8080/
+open http://<PLAYER_IP>:8080/
 
 # View raw video stream (no HTML wrapper)
-open http://<player>:8080/video
+open http://<PLAYER_IP>:8080/video
 ```
 
 ### Recording with ffmpeg
@@ -139,19 +158,19 @@ The `/video` endpoint provides an MJPEG stream that ffmpeg can record:
 
 ```bash
 # Basic recording (copies stream as-is)
-ffmpeg -i http://<player>:8080/video -c copy recording.mpeg
+ffmpeg -i http://<PLAYER_IP>:8080/video -c copy recording.mpeg
 
 # Record for specific duration (60 seconds)
-ffmpeg -i http://<player>:8080/video -t 60 -c copy recording.mpeg
+ffmpeg -i http://<PLAYER_IP>:8080/video -t 60 -c copy recording.mpeg
 
 # Convert to MP4 while recording
-ffmpeg -i http://<player>:8080/video -c:v libx264 -r 30 recording.mp4
+ffmpeg -i http://<PLAYER_IP>:8080/video -c:v libx264 -r 30 recording.mp4
 
 # High quality MP4 recording
-ffmpeg -i http://<player>:8080/video -c:v libx264 -crf 18 -r 30 high_quality.mp4
+ffmpeg -i http://<PLAYER_IP>:8080/video -c:v libx264 -crf 18 -r 30 high_quality.mp4
 
 # Record with custom frame rate
-ffmpeg -i http://<player>:8080/video -r 25 -c:v libx264 output.mp4
+ffmpeg -i http://<PLAYER_IP>:8080/video -r 25 -c:v libx264 output.mp4
 ```
 
 ### Streaming to Other Services
@@ -160,15 +179,15 @@ Use the video stream with streaming platforms:
 
 ```bash
 # Stream to YouTube Live (requires stream key)
-ffmpeg -i http://<player>:8080/video -c:v libx264 -b:v 2500k -r 30 \
+ffmpeg -i http://<PLAYER_IP>:8080/video -c:v libx264 -b:v 2500k -r 30 \
   -f flv rtmp://a.rtmp.youtube.com/live2/YOUR_STREAM_KEY
 
 # Stream to Twitch (requires stream key)
-ffmpeg -i http://<player>:8080/video -c:v libx264 -b:v 2500k -r 30 \
+ffmpeg -i http://<PLAYER_IP>:8080/video -c:v libx264 -b:v 2500k -r 30 \
   -f flv rtmp://live.twitch.tv/app/YOUR_STREAM_KEY
 
 # Re-stream to local RTMP server
-ffmpeg -i http://<player>:8080/video -c:v libx264 -f flv rtmp://<rtmp-server>/live/stream
+ffmpeg -i http://<PLAYER_IP>:8080/video -c:v libx264 -f flv rtmp://<rtmp-server>/live/stream
 ```
 
 ### Integration Examples
@@ -177,26 +196,26 @@ Embed or integrate the stream in applications:
 
 ```bash
 # View in VLC media player
-vlc http://<player>:8080/video
+vlc http://<PLAYER_IP>:8080/video
 
 # Use with OBS Studio
-# Add "Media Source" → Input: http://<player>:8080/video
+# Add "Media Source" → Input: http://<PLAYER_IP>:8080/video
 
 # Embed in HTML page
-echo '<img src="http://<player>:8080/video" alt="Live Stream">' > viewer.html
+echo '<img src="http://<PLAYER_IP>:8080/video" alt="Live Stream">' > viewer.html
 
 # Use with curl for testing
-curl -N http://<player>:8080/video > stream_test.mjpeg
+curl -N http://<PLAYER_IP>:8080/video > stream_test.mjpeg
 ```
 
 ### Monitoring and Health Checks
 
 ```bash
 # Check server health
-curl http://<player>:8080/health
+curl http://<PLAYER_IP>:8080/health
 
 # Get current image directly
-curl http://<player>:8080/image > current_frame.jpg
+curl http://<PLAYER_IP>:8080/image > current_frame.jpg
 
 ```
 
@@ -214,7 +233,7 @@ Set up automated recording with rotation:
 # Record 1-hour segments with timestamps
 while true; do
   timestamp=$(date +%Y%m%d_%H%M%S)
-  ffmpeg -i http://<player>:8080/video -t 3600 -c copy "recording_${timestamp}.mpeg"
+  ffmpeg -i http://<PLAYER_IP>:8080/video -t 3600 -c copy "recording_${timestamp}.mpeg"
   sleep 10  # Brief pause between recordings
 done
 ```
@@ -289,7 +308,7 @@ bs-image-stream-server/
   - Works with VLC, OBS, and other video software
 - **When to use**:
   - Browser viewing without web interface
-  - Video recording with ffmpeg (`ffmpeg -i http://<player>/video -c copy output.mpeg`)
+  - Video recording with ffmpeg (`ffmpeg -i http://<PLAYER_IP>:8080/video -c copy output.mpeg`)
   - Embedding in other applications
   - Streaming to platforms (YouTube, Twitch, etc.)
 
@@ -512,16 +531,16 @@ The `/video` endpoint works directly with ffmpeg without requiring format parame
 
 ```bash
 # Basic recording (confirmed working)
-ffmpeg -i http://<player>:8080/video -c copy recording.mpeg
+ffmpeg -i http://<PLAYER_IP>:8080/video -c copy recording.mpeg
 
 # If stream format issues occur, try re-encoding
-ffmpeg -i http://<player>:8080/video -c:v libx264 -r 30 recording.mp4
+ffmpeg -i http://<PLAYER_IP>:8080/video -c:v libx264 -r 30 recording.mp4
 
 # For longer recordings, add duration limit
-ffmpeg -i http://<player>:8080/video -t 3600 -c copy recording.mpeg
+ffmpeg -i http://<PLAYER_IP>:8080/video -t 3600 -c copy recording.mpeg
 
 # If connection issues occur, increase buffer size
-ffmpeg -i http://<player>:8080/video -buffer_size 32768 -c copy recording.avi
+ffmpeg -i http://<PLAYER_IP>:8080/video -buffer_size 32768 -c copy recording.avi
 ```
 
 **Expected behavior**: ffmpeg will detect the stream as `mpjpeg` format and achieve 25-30 FPS recording. The "Packet corrupt" warning at the end is normal when the stream ends.
@@ -530,7 +549,7 @@ ffmpeg -i http://<player>:8080/video -buffer_size 32768 -c copy recording.avi
 
 ffmpeg should show output similar to:
 ```
-Input #0, mpjpeg, from 'http://<player>:8080/video':
+Input #0, mpjpeg, from 'http://<PLAYER_IP>:8080/video':
   Duration: N/A, bitrate: N/A
   Stream #0:0: Video: mjpeg (Baseline), yuvj420p, 640x480, 25 tbr, 25 tbn
 ```
